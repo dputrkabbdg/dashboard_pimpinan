@@ -248,7 +248,6 @@
       setInterval(createRaindrop, 1520);
     });
   </script>
-
   <!-- Dashboard Progress -->
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1875135079&single=true&output=csv";
@@ -273,12 +272,14 @@
       return rows;
     }
 
-    function formatRupiahDash(n){
+    // ✅ fungsi baru untuk format rupiah full
+    function formatRupiahFull(n){
       const num = Number(n);
       if (!isFinite(num)) return sanitizeText(n);
       return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",minimumFractionDigits:0}).format(num);
     }
 
+    // ✅ modifikasi renderDashboard
     function renderDashboard(data){
       const container = document.getElementById("dashboard");
       container.innerHTML = "";
@@ -312,42 +313,51 @@
         h2.className = "text-2xl font-bold text-indigo-600 mb-2";
         setText(h2, unit);
 
-        const p = document.createElement("p");
-        p.className = "text-sm text-gray-600 mb-4";
-        p.innerHTML = `Jumlah Total Paket: <span class="font-semibold">${escapeHTML(jumlah)}</span>`;
+        // ✅ total paket
+        const p1 = document.createElement("p");
+        p1.className = "text-sm text-gray-600";
+        p1.innerHTML = `Jumlah Total Paket: <span class="font-semibold">${escapeHTML(jumlah)}</span>`;
+
+        // ✅ total pagu
+        const p2 = document.createElement("p");
+        p2.className = "text-sm text-gray-600 mb-4";
+        p2.innerHTML = `Total Pagu Anggaran: <span class="font-semibold">${escapeHTML(formatRupiahFull(pagu))}</span>`;
 
         const grid = document.createElement("div");
         grid.className = "grid grid-cols-1 md:grid-cols-3 gap-6";
 
-        // BOX 1 - Persiapan (indigo)
+        // BOX 1 - Persiapan
         const b1 = document.createElement("div");
         b1.className = "p-4 rounded-lg border bg-indigo-50";
-        const b1t = document.createElement("h3"); b1t.className="font-semibold text-lg mb-2"; setText(b1t,"Persiapan");
-        const b1n = document.createElement("p");  b1n.className="text-2xl font-bold text-indigo-700"; setText(b1n,persiapan);
-        const b1p = document.createElement("p");  b1p.className="text-gray-600"; setText(b1p,`(${persiapanPct}% paket)`);
-        const b1v = document.createElement("p");  b1v.className="text-sm text-gray-500 mb-3"; setText(b1v, `${formatRupiahDash(nilaiPersiapan)} (${paguPersiapanPct}% pagu)`);
-        b1.append(b1t,b1n,b1p,b1v);
+        b1.innerHTML = `
+          <h3 class="font-semibold text-lg mb-2">Persiapan</h3>
+          <p class="text-2xl font-bold text-indigo-700">${persiapan}</p>
+          <p class="text-gray-600">(${persiapanPct}% paket)</p>
+          <p class="text-sm text-gray-500 mb-3">${formatRupiahFull(nilaiPersiapan)} (${paguPersiapanPct}% pagu)</p>
+        `;
 
-        // BOX 2 - Berkontrak (green)
+        // BOX 2 - Berkontrak
         const b2 = document.createElement("div");
         b2.className = "p-4 rounded-lg border bg-green-50";
-        const b2t = document.createElement("h3"); b2t.className="font-semibold text-lg mb-2"; setText(b2t,"Berkontrak");
-        const b2n = document.createElement("p");  b2n.className="text-2xl font-bold text-green-700"; setText(b2n,berkontrak);
-        const b2p = document.createElement("p");  b2p.className="text-gray-600"; setText(b2p,`(${berkontrakPct}% paket)`);
-        const b2v = document.createElement("p");  b2v.className="text-sm text-gray-500 mb-3"; setText(b2v, `${formatRupiahDash(nilaiBerkontrak)} (${paguBerkontrakPct}% pagu)`);
-        b2.append(b2t,b2n,b2p,b2v);
+        b2.innerHTML = `
+          <h3 class="font-semibold text-lg mb-2">Berkontrak</h3>
+          <p class="text-2xl font-bold text-green-700">${berkontrak}</p>
+          <p class="text-gray-600">(${berkontrakPct}% paket)</p>
+          <p class="text-sm text-gray-500 mb-3">${formatRupiahFull(nilaiBerkontrak)} (${paguBerkontrakPct}% pagu)</p>
+        `;
 
-        // BOX 3 - Selesai (blue)
+        // BOX 3 - Selesai
         const b3 = document.createElement("div");
         b3.className = "p-4 rounded-lg border bg-blue-50";
-        const b3t = document.createElement("h3"); b3t.className="font-semibold text-lg mb-2"; setText(b3t,"Selesai");
-        const b3n = document.createElement("p");  b3n.className="text-2xl font-bold text-blue-700"; setText(b3n,selesai);
-        const b3p = document.createElement("p");  b3p.className="text-gray-600"; setText(b3p,`(${selesaiPct}% paket)`);
-        const b3v = document.createElement("p");  b3v.className="text-sm text-gray-500 mb-3"; setText(b3v, `${formatRupiahDash(nilaiSelesai)} (${paguSelesaiPct}% pagu)`);
-        b3.append(b3t,b3n,b3p,b3v);
+        b3.innerHTML = `
+          <h3 class="font-semibold text-lg mb-2">Selesai</h3>
+          <p class="text-2xl font-bold text-blue-700">${selesai}</p>
+          <p class="text-gray-600">(${selesaiPct}% paket)</p>
+          <p class="text-sm text-gray-500 mb-3">${formatRupiahFull(nilaiSelesai)} (${paguSelesaiPct}% pagu)</p>
+        `;
 
         grid.append(b1,b2,b3);
-        card.append(h2,p,grid);
+        card.append(h2,p1,p2,grid);
         container.appendChild(card);
       });
     }
@@ -356,17 +366,13 @@
       const res  = await fetch(safeURL(csvUrl));
       const text = await res.text();
       const rows = parseCSV(text.trim());
-      // buang header
-      renderDashboard(rows.slice(1));
+      renderDashboard(rows.slice(1)); // buang header
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchData();
-      // kalau mau auto-refresh, aktifkan:
-      // setInterval(fetchData, 10000);
-      // loadTableData(); // kalau tabel dengan #table-header/#table-body memang ada
-    });
+    document.addEventListener('DOMContentLoaded', fetchData);
   </script>
+
 </body>
 </html>
+
 
