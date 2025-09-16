@@ -293,8 +293,8 @@
 
         const jumlah          = row[1] || "0";
         const pagu            = row[2] || "0";
-        const pengadaan       = row[3] || "0";
-        const nilaiPengadaan  = row[4] || "0";
+        const persiapan       = row[3] || "0";
+        const nilaiPersiapan  = row[4] || "0";
         const berkontrak      = row[5] || "0";
         const nilaiBerkontrak = row[6] || "0";
         const selesai         = row[7] || "0";
@@ -309,17 +309,17 @@
         }
         const jml = toNum(jumlah);
         const pg  = toNum(pagu);
-        const ps  = toNum(pengadaan);
+        const ps  = toNum(persiapan);
         const nb  = toNum(berkontrak);
         const ns  = toNum(selesai);
-        const npv = toNum(nilaipengadaan);
+        const npv = toNum(nilaiPersiapan);
         const nbv = toNum(nilaiBerkontrak);
         const nsv = toNum(nilaiSelesai);
 
         const persiapanPct      = jml ? ((ps / jml) * 100).toFixed(1) : "0";
         const berkontrakPct     = jml ? ((nb / jml) * 100).toFixed(1) : "0";
         const selesaiPct        = jml ? ((ns / jml) * 100).toFixed(1) : "0";
-        const pagupengadaanPct  = pg  ? ((npv / pg) * 100).toFixed(1) : "0";
+        const paguPersiapanPct  = pg  ? ((npv / pg) * 100).toFixed(1) : "0";
         const paguBerkontrakPct = pg  ? ((nbv / pg) * 100).toFixed(1) : "0";
         const paguSelesaiPct    = pg  ? ((nsv / pg) * 100).toFixed(1) : "0";
 
@@ -348,9 +348,9 @@
         b1.className = "p-4 rounded-lg border bg-indigo-50";
         b1.innerHTML = `
           <h3 class="font-semibold text-lg mb-2">Persiapan</h3>
-          <p class="text-2xl font-bold text-indigo-700">${pengadaan}</p>
-          <p class="text-gray-600">(${pengadaanct}% paket)</p>
-          <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiPengadaan)} (${paguPengadaanPct}% pagu)</p>
+          <p class="text-2xl font-bold text-indigo-700">${persiapan}</p>
+          <p class="text-gray-600">(${persiapanPct}% paket)</p>
+          <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiPersiapan)} (${paguPersiapanPct}% pagu)</p>
         `;
 
         // BOX 2 - Berkontrak
@@ -393,8 +393,6 @@
 
 </body>
 </html>
-
-
 
 
 
