@@ -343,16 +343,15 @@
         const grid = document.createElement("div");
         grid.className = "grid grid-cols-1 md:grid-cols-3 gap-6";
 
-     // BOX 1 - Pengadaan
-const b1 = document.createElement("div");
-b1.className = "p-4 rounded-lg border bg-indigo-50";
-b1.innerHTML = `
-  <h3 class="font-semibold text-lg mb-2">Pengadaan</h3>
-  <p class="text-2xl font-bold text-indigo-700">${pengadaan}</p>
-  <p class="text-gray-600">(${pengadaanPct}% paket)</p>
-  <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiPengadaan)} (${paguPengadaanPct}% pagu)</p>
-`;
-
+        // BOX 1 - Pengadaan
+        const b1 = document.createElement("div");
+        b1.className = "p-4 rounded-lg border bg-indigo-50";
+        b1.innerHTML = `
+          <h3 class="font-semibold text-lg mb-2">Persiapan</h3>
+          <p class="text-2xl font-bold text-indigo-700">${persiapan}</p>
+          <p class="text-gray-600">(${persiapanPct}% paket)</p>
+          <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiPersiapan)} (${paguPersiapanPct}% pagu)</p>
+        `;
 
         // BOX 2 - Berkontrak
         const b2 = document.createElement("div");
@@ -394,8 +393,6 @@ b1.innerHTML = `
 
 </body>
 </html>
-
-
 
 
 
