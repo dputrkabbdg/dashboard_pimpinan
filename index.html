@@ -249,9 +249,11 @@
     });
   </script>
   <!-- Dashboard Progress -->
+   <!-- Dashboard Progress -->
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1875135079&single=true&output=csv";
 
+    // 🔹 fungsi parser CSV
     function parseCSV(text){
       const rows=[]; let cur="", row=[], inQ=false;
       for (let i=0;i<text.length;i++){
@@ -272,14 +274,19 @@
       return rows;
     }
 
-    // ✅ fungsi baru untuk format rupiah full
-    function formatRupiahFull(n){
-      const num = Number(n);
-      if (!isFinite(num)) return sanitizeText(n);
-      return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",minimumFractionDigits:0}).format(num);
+    // 🔹 fungsi baru untuk format rupiah FULL tanpa singkatan
+    function formatRupiahFull(v){
+      const n = Number(v);
+      if (!isFinite(n)) return sanitizeText(v);
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(n);
     }
 
-    // ✅ modifikasi renderDashboard
+    // 🔹 render dashboard
     function renderDashboard(data){
       const container = document.getElementById("dashboard");
       container.innerHTML = "";
@@ -313,12 +320,12 @@
         h2.className = "text-2xl font-bold text-indigo-600 mb-2";
         setText(h2, unit);
 
-        // ✅ total paket
+        // total paket
         const p1 = document.createElement("p");
         p1.className = "text-sm text-gray-600";
         p1.innerHTML = `Jumlah Total Paket: <span class="font-semibold">${escapeHTML(jumlah)}</span>`;
 
-        // ✅ total pagu
+        // total pagu
         const p2 = document.createElement("p");
         p2.className = "text-sm text-gray-600 mb-4";
         p2.innerHTML = `Total Pagu Anggaran: <span class="font-semibold">${escapeHTML(formatRupiahFull(pagu))}</span>`;
@@ -372,7 +379,9 @@
     document.addEventListener('DOMContentLoaded', fetchData);
   </script>
 
+
 </body>
 </html>
+
 
 
