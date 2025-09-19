@@ -14,6 +14,9 @@
   <!-- Animate.css CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
+  <!-- Chart.js for line chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root { --card-w: 240px; --card-h: 160px; }
     body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
@@ -80,6 +83,22 @@
       </h1>
     </div>
     <div class="wave"></div>
+  </div>
+
+  <!-- ====== (BARU) RINGKASAN REKAP DINAS + CHART (gid=1853757195) ====== -->
+  <div class="w-full max-w-7xl px-4 sm:px-6 -mt-10 mb-10">
+    <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6">
+      <h2 class="text-xl md:text-2xl font-bold text-teal-700 mb-6 text-center">📊 Rekap Dinas & Tren Prognosis (Sept–Nov 2025)</h2>
+
+      <!-- Cards ringkasan -->
+      <div id="rekap-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10"></div>
+
+      <!-- Line chart -->
+      <div class="bg-white/80 rounded-2xl shadow p-4">
+        <h3 class="text-center text-teal-700 font-semibold mb-3">📈 Tren Prognosis</h3>
+        <canvas id="prognosisChartTop"></canvas>
+      </div>
+    </div>
   </div>
 
   <!-- Dashboard Progress -->
@@ -248,38 +267,170 @@
       setInterval(createRaindrop, 1520);
     });
   </script>
-  <!-- Dashboard Progress -->
-  <script>
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1875135079&single=true&output=csv";
 
-    // parser CSV
+  <!-- ====== (BARU) SCRIPT REKAP DINAS TOP (gid=1853757195) ====== -->
+<script>
+  (function(){
+    const CSV_REKAP_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1853757195&single=true&output=csv";
+
+    // Formatter
+    const fIDR = n => isNaN(n) ? '-' :
+      new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
+    const fInt = n => isNaN(n) ? '-' : new Intl.NumberFormat('id-ID').format(n);
+    const fPct = n => isNaN(n) ? '-' : `${(+n).toFixed(2)}%`;
+    const toNum = s => parseFloat(String(s||'').replace(/\./g,'').replace(/,/g,'.')) || 0;
+
+    // Card
+    function card(title, main, sub, prog, color="teal"){
+      const bar =
+        color==="green" ? "bg-green-500" :
+        color==="cyan"  ? "bg-cyan-500"  :
+        color==="lime"  ? "bg-lime-500"  : "bg-teal-500";
+      const hasProg = prog !== undefined && !isNaN(prog);
+      return `
+        <div class="bg-white/90 border border-teal-100 p-4 rounded-2xl shadow hover:shadow-lg transition text-center">
+          <h2 class="text-sm font-semibold mb-2 text-gray-600">${title}</h2>
+          <p class="text-xl font-bold text-teal-700">${main}</p>
+          ${sub ? `<p class="mt-1 text-sm text-gray-500">${sub}</p>` : ``}
+          ${hasProg ? `
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div class="${bar} h-2 rounded-full" style="width:${prog}%;"></div>
+            </div>` : ``}
+        </div>
+      `;
+    }
+
+    // Parser CSV lokal
     function parseCSV(text){
       const rows=[]; let cur="", row=[], inQ=false;
       for (let i=0;i<text.length;i++){
-        const ch=text[i], nch=text[i+1];
-        if (inQ){
-          if (ch==='"' && nch==='"'){ cur+='"'; i++; }
-          else if (ch==='"'){ inQ=false; }
-          else { cur+=ch; }
-        } else {
-          if (ch==='"'){ inQ=true; }
-          else if (ch===','){ row.push(cur); cur=""; }
-          else if (ch==='\n'){ row.push(cur); rows.push(row); row=[]; cur=""; }
-          else if (ch==='\r'){ /* ignore */ }
-          else { cur+=ch; }
+        const ch=text[i],n=text[i+1];
+        if(inQ){
+          if(ch==='"' && n==='"'){cur+='"';i++}
+          else if(ch==='"'){inQ=false}
+          else cur+=ch;
+        }else{
+          if(ch==='"'){inQ=true}
+          else if(ch===','){row.push(cur);cur=""}
+          else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur=""}
+          else if(ch!=='\r'){cur+=ch}
         }
       }
       row.push(cur); rows.push(row);
       return rows;
     }
 
+    function render(d){
+      const wrap = document.getElementById('rekap-cards');
+      if(!wrap) return;
+
+      wrap.innerHTML = `
+        ${card("Total Paket", fInt(d.totalPaket))}
+        ${card("Total Anggaran", fIDR(d.totalAnggaran))}
+        ${card("Pekerjaan Fisik", fInt(d.pekerjaanFisik))}
+        ${card("Pagu Fisik", fIDR(d.paguFisik))}
+        ${card("Non Fisik", fInt(d.nonFisik))}
+        ${card("Pagu Non Fisik", fIDR(d.paguNonFisik))}
+        ${card("Belanja Umum", fIDR(d.belanjaUmum))}
+        ${card("Persiapan/Pengadaan", fInt(d.persiapanPengadaan))}
+        ${card("Pagu Pengadaan", fIDR(d.paguPengadaan))}
+        ${card("Berkontrak", fInt(d.berkontrak))}
+        ${card("Nilai Kontrak (Berkontrak)", fIDR(d.nilaiKontrakBerkontrak))}
+        ${card("Selesai", fInt(d.selesai), fPct(d.pctPaketSelesai), d.pctPaketSelesai, "green")}
+        ${card("Nilai Kontrak (selesai)", fIDR(d.nilaiKontrakSelesai), fPct(d.pctNilaiKontrakSelesai), d.pctNilaiKontrakSelesai, "teal")}
+        ${card("Prognosis 30 Sept 2025", fIDR(d.prognosisSept), fPct(d.pctPrognosisSept), d.pctPrognosisSept, "cyan")}
+        ${card("Prognosis 31 Okt 2025", fIDR(d.prognosisOkt), fPct(d.pctPrognosisOkt), d.pctPrognosisOkt, "lime")}
+        ${card("Prognosis 30 Nov 2025", fIDR(d.prognosisNov), fPct(d.pctPrognosisNov), d.pctPrognosisNov, "green")}
+      `;
+
+      const ctx = document.getElementById('prognosisChartTop')?.getContext('2d');
+      if(!ctx) return;
+      new Chart(ctx,{
+        type:'line',
+        data:{
+          labels:["30 Sept 2025","31 Okt 2025","30 Nov 2025"],
+          datasets:[{
+            label:'Nilai Prognosis',
+            data:[d.prognosisSept,d.prognosisOkt,d.prognosisNov],
+            borderColor:'#14b8a6',
+            backgroundColor:'rgba(20,184,166,0.15)',
+            borderWidth:3,
+            pointBackgroundColor:'#0d9488',
+            pointRadius:6,
+            tension:0.3
+          }]
+        },
+        options:{
+          responsive:true,
+          plugins:{ legend:{ labels:{ color:'#0f766e' } } },
+          scales:{
+            x:{ ticks:{ color:'#0f766e' }, grid:{ color:'rgba(0,0,0,0.05)' } },
+            y:{ ticks:{ color:'#0f766e', callback:v=>fIDR(v) }, grid:{ color:'rgba(0,0,0,0.05)' } }
+          }
+        }
+      });
+    }
+
+    async function fetchRekap(){
+      try{
+        const res = await fetch(CSV_REKAP_URL);
+        const text = await res.text();
+        const rows = parseCSV(text.trim());
+
+        // Ambil baris data pertama setelah header yang tidak kosong
+        const dataRow = (rows.slice(1).find(r => r.some(c => String(c).trim() !== "")) ) || rows[1] || [];
+
+        // Kolom A–P
+        const totalPaket             = toNum(dataRow[0]);
+        const totalAnggaran          = toNum(dataRow[1]);
+        const pekerjaanFisik         = toNum(dataRow[2]);
+        const paguFisik              = toNum(dataRow[3]);
+        const nonFisik               = toNum(dataRow[4]);
+        const paguNonFisik           = toNum(dataRow[5]);
+        const belanjaUmum            = toNum(dataRow[6]);
+        const persiapanPengadaan     = toNum(dataRow[7]);
+        const paguPengadaan          = toNum(dataRow[8]);
+        const berkontrak             = toNum(dataRow[9]);
+        const nilaiKontrakBerkontrak = toNum(dataRow[10]);
+        const selesai                = toNum(dataRow[11]);
+        const nilaiKontrakSelesai    = toNum(dataRow[12]);
+        const prognosisSept          = toNum(dataRow[13]);
+        const prognosisOkt           = toNum(dataRow[14]);
+        const prognosisNov           = toNum(dataRow[15]);
+
+        render({
+          totalPaket, totalAnggaran, pekerjaanFisik, paguFisik,
+          nonFisik, paguNonFisik, belanjaUmum, persiapanPengadaan,
+          paguPengadaan, berkontrak, nilaiKontrakBerkontrak,
+          selesai, nilaiKontrakSelesai, prognosisSept, prognosisOkt, prognosisNov,
+          pctPaketSelesai: totalPaket>0 ? (selesai/totalPaket*100) : 0,
+          pctNilaiKontrakSelesai: totalAnggaran>0 ? (nilaiKontrakSelesai/totalAnggaran*100) : 0,
+          pctPrognosisSept: totalAnggaran>0 ? (prognosisSept/totalAnggaran*100) : 0,
+          pctPrognosisOkt: totalAnggaran>0 ? (prognosisOkt/totalAnggaran*100) : 0,
+          pctPrognosisNov: totalAnggaran>0 ? (prognosisNov/totalAnggaran*100) : 0
+        });
+      }catch(e){
+        console.error("Gagal memuat rekap dinas:", e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchRekap);
+  })();
+</script>
+
+
+  <!-- Dashboard Progress -->
+  <script>
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1875135079&single=true&output=csv";
+
+    // parser CSV (sudah ada parseCSV di atas), di sini tetap gunakan yang sama
+
     // ✅ tampilkan angka apa adanya dari CSV, hanya ditambah Rp
     function formatRupiahCSV(val){
       if (val == null) return "-";
       let s = String(val).trim();
       if (!s) return "-";
-      // kalau sudah ada Rp di CSV, jangan dobel
-      if (/^rp/i.test(s)) return s;
+      if (/^rp/i.test(s)) return s; // jika sudah ada Rp
       return "Rp " + s;
     }
 
@@ -302,7 +453,6 @@
 
         if (String(jumlah).trim()==="0" && String(pagu).trim()==="0") return;
 
-        // hitung % tetap pakai angka bersih
         function toNum(v){ 
           let s=String(v).replace(/\./g,"").replace(/,/g,"."); 
           return parseFloat(s)||0; 
@@ -330,12 +480,10 @@
         h2.className = "text-2xl font-bold text-indigo-600 mb-2";
         setText(h2, unit);
 
-        // total paket
         const p1 = document.createElement("p");
         p1.className = "text-sm text-gray-600";
         p1.innerHTML = `Jumlah Total Paket: <span class="font-semibold">${escapeHTML(jumlah)}</span>`;
 
-        // total pagu (apa adanya dari CSV)
         const p2 = document.createElement("p");
         p2.className = "text-sm text-gray-600 mb-4";
         p2.innerHTML = `Total Pagu Anggaran: <span class="font-semibold">${escapeHTML(formatRupiahCSV(pagu))}</span>`;
@@ -343,7 +491,6 @@
         const grid = document.createElement("div");
         grid.className = "grid grid-cols-1 md:grid-cols-3 gap-6";
 
-        // BOX 1 - Pengadaan
         const b1 = document.createElement("div");
         b1.className = "p-4 rounded-lg border bg-indigo-50";
         b1.innerHTML = `
@@ -353,7 +500,6 @@
           <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiPersiapan)} (${paguPersiapanPct}% pagu)</p>
         `;
 
-        // BOX 2 - Berkontrak
         const b2 = document.createElement("div");
         b2.className = "p-4 rounded-lg border bg-green-50";
         b2.innerHTML = `
@@ -363,7 +509,6 @@
           <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiBerkontrak)} (${paguBerkontrakPct}% pagu)</p>
         `;
 
-        // BOX 3 - Selesai
         const b3 = document.createElement("div");
         b3.className = "p-4 rounded-lg border bg-blue-50";
         b3.innerHTML = `
@@ -389,10 +534,5 @@
     document.addEventListener('DOMContentLoaded', fetchData);
   </script>
 
-
-
 </body>
 </html>
-
-
-
