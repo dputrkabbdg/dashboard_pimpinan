@@ -21,13 +21,28 @@
     :root { --card-w: 240px; --card-h: 160px; }
     body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
 
-    .header-bg { background: linear-gradient(135deg, #2563eb, #9333ea); height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+   /* 🔹 Header background dengan animasi gradient biru-ungu */
+.header-bg { 
+  background: linear-gradient(-45deg, #2563eb, #4338ca, #3b82f6, #6366f1); 
+  background-size: 400% 400%;
+  animation: gradientShift 18s ease infinite;
+  height: 100vh; 
+  position: relative; 
+  overflow: hidden; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 
     .wave { position: absolute; bottom: -1px; left: 0; width: 200%; height: 120px; background: url('https://svgshare.com/i/uUu.svg') repeat-x; background-size: 50% 120px; animation: waveMove 8s linear infinite; opacity: 0.9; z-index: 5; }
     @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-    .raindrop { position: absolute; top: -100px; width: 2px; height: 40px; background: rgba(255, 255, 255, 0.5); border-radius: 1px; animation: fall linear infinite; z-index: 3; }
-    @keyframes fall { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(110vh); opacity: 0; } }
 
     .dashboard-card { width: var(--card-w); height: var(--card-h); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1rem; border-radius: 18px; cursor: pointer; user-select: none; background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); box-shadow: 0 4px 16px rgba(0,0,0,0.08); transition: all 0.3s ease; position: relative; overflow: hidden; }
     .dashboard-card::before { content: ""; position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.15)); opacity: 0; transition: opacity 0.3s ease; }
@@ -270,23 +285,6 @@
 
       } catch(e){ console.error("Gagal memuat data:", e); }
     }
-  </script>
-
-  <!-- Efek hujan -->
-  <script>
-    const rainContainer = document.getElementById("rain-container");
-    function createRaindrop(){
-      const drop=document.createElement("div");
-      drop.className="raindrop";
-      drop.style.left = Math.random()*window.innerWidth + "px";
-      drop.style.animationDuration = (1 + Math.random()*1.5) + "s";
-      drop.style.opacity = (Math.random()*0.7 + 0.3).toFixed(2);
-      rainContainer.appendChild(drop);
-      setTimeout(()=>drop.remove(), 2500);
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      setInterval(createRaindrop, 1520);
-    });
   </script>
 
   <!-- ====== (BARU) SCRIPT REKAP DINAS TOP (gid=1853757195) ====== -->
@@ -574,6 +572,7 @@
 
 </body>
 </html>
+
 
 
 
