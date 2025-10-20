@@ -448,119 +448,105 @@
 
 
   <!-- Dashboard Progress -->
+  <!-- Dashboard Progress -->
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1875135079&single=true&output=csv";
 
-    // parser CSV (sudah ada parseCSV di atas), di sini tetap gunakan yang sama
-
-    // ✅ tampilkan angka apa adanya dari CSV, hanya ditambah Rp
-    function formatRupiahCSV(val){
-      if (val == null) return "-";
-      let s = String(val).trim();
-      if (!s) return "-";
-      if (/^rp/i.test(s)) return s; // jika sudah ada Rp
-      return "Rp " + s;
+    // ✅ Parser CSV (pakai versi paling stabil)
+    function parseCSV(text){
+      const rows=[]; let cur="", row=[], inQ=false;
+      for(let i=0;i<text.length;i++){
+        const ch=text[i],n=text[i+1];
+        if(inQ){
+          if(ch==='"'&&n==='"'){cur+='"';i++;}
+          else if(ch==='"'){inQ=false;}
+          else cur+=ch;
+        }else{
+          if(ch==='"'){inQ=true;}
+          else if(ch===','){row.push(cur);cur="";}
+          else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur="";}
+          else if(ch!=='\r'){cur+=ch;}
+        }
+      }
+      row.push(cur);rows.push(row);
+      return rows;
     }
 
+    // ✅ Formatter & kalkulator aman
+    function toNum(v){
+      if(v==null) return 0;
+      let s=String(v).trim();
+      if(!s) return 0;
+      s=s.replace(/[^\d,.-]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',', '.');
+      const n=parseFloat(s);
+      return isNaN(n)?0:n;
+    }
+    const persen = (a,b) => b>0 ? Math.round((a/b)*1000)/10 : 0;
+    const rupiah = v => "Rp " + toNum(v).toLocaleString('id-ID');
+
+    // ✅ Fungsi utama untuk render dashboard
     function renderDashboard(data){
-      const container = document.getElementById("dashboard");
-      container.innerHTML = "";
+      const container=document.getElementById("dashboard");
+      container.innerHTML="";
+      data.forEach(row=>{
+        const unit=sanitizeText(row[0]);
+        if(!unit) return;
 
-      data.forEach(row => {
-        const unit = sanitizeText(row[0]);
-        if (!unit) return;
+        const jumlah=toNum(row[1]),
+              pagu=toNum(row[2]),
+              persiapan=toNum(row[3]),
+              nilaiPersiapan=toNum(row[4]),
+              berkontrak=toNum(row[5]),
+              nilaiBerkontrak=toNum(row[6]),
+              selesai=toNum(row[7]),
+              nilaiSelesai=toNum(row[8]);
 
-        const jumlah          = row[1] || "0";
-        const pagu            = row[2] || "0";
-        const persiapan       = row[3] || "0";
-        const nilaiPersiapan  = row[4] || "0";
-        const berkontrak      = row[5] || "0";
-        const nilaiBerkontrak = row[6] || "0";
-        const selesai         = row[7] || "0";
-        const nilaiSelesai    = row[8] || "0";
+        // Buat elemen kartu
+        const card=document.createElement("div");
+        card.className="bg-white shadow-lg rounded-xl p-6 w-full";
+        card.innerHTML=`
+          <h2 class="text-2xl font-bold text-indigo-600 mb-2">${unit}</h2>
+          <p class="text-sm text-gray-600">Jumlah Total Paket: <span class="font-semibold">${jumlah}</span></p>
+          <p class="text-sm text-gray-600 mb-4">Total Pagu Anggaran: <span class="font-semibold">${rupiah(pagu)}</span></p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        if (String(jumlah).trim()==="0" && String(pagu).trim()==="0") return;
+            <div class="p-4 rounded-lg border bg-indigo-50">
+              <h3 class="font-semibold text-lg mb-2">Persiapan</h3>
+              <p class="text-2xl font-bold text-indigo-700">${persiapan}</p>
+              <p class="text-gray-600">(${persen(persiapan,jumlah)}% paket)</p>
+              <p class="text-sm text-gray-500">${rupiah(nilaiPersiapan)} (${persen(nilaiPersiapan,pagu)}% pagu)</p>
+            </div>
 
-        function toNum(v){ 
-          let s=String(v).replace(/\./g,"").replace(/,/g,"."); 
-          return parseFloat(s)||0; 
-        }
-        const jml = toNum(jumlah);
-        const pg  = toNum(pagu);
-        const ps  = toNum(persiapan);
-        const nb  = toNum(berkontrak);
-        const ns  = toNum(selesai);
-        const npv = toNum(nilaiPersiapan);
-        const nbv = toNum(nilaiBerkontrak);
-        const nsv = toNum(nilaiSelesai);
+            <div class="p-4 rounded-lg border bg-green-50">
+              <h3 class="font-semibold text-lg mb-2">Berkontrak</h3>
+              <p class="text-2xl font-bold text-green-700">${berkontrak}</p>
+              <p class="text-gray-600">(${persen(berkontrak,jumlah)}% paket)</p>
+              <p class="text-sm text-gray-500">${rupiah(nilaiBerkontrak)} (${persen(nilaiBerkontrak,pagu)}% pagu)</p>
+            </div>
 
-        const persiapanPct      = jml ? ((ps / jml) * 100).toFixed(1) : "0";
-        const berkontrakPct     = jml ? ((nb / jml) * 100).toFixed(1) : "0";
-        const selesaiPct        = jml ? ((ns / jml) * 100).toFixed(1) : "0";
-        const paguPersiapanPct  = pg  ? ((npv / pg) * 100).toFixed(1) : "0";
-        const paguBerkontrakPct = pg  ? ((nbv / pg) * 100).toFixed(1) : "0";
-        const paguSelesaiPct    = pg  ? ((nsv / pg) * 100).toFixed(1) : "0";
+            <div class="p-4 rounded-lg border bg-blue-50">
+              <h3 class="font-semibold text-lg mb-2">Selesai</h3>
+              <p class="text-2xl font-bold text-blue-700">${selesai}</p>
+              <p class="text-gray-600">(${persen(selesai,jumlah)}% paket)</p>
+              <p class="text-sm text-gray-500">${rupiah(nilaiSelesai)} (${persen(nilaiSelesai,pagu)}% pagu)</p>
+            </div>
 
-        const card = document.createElement("div");
-        card.className = "bg-white shadow-lg rounded-xl p-6 w-full";
-
-        const h2 = document.createElement("h2");
-        h2.className = "text-2xl font-bold text-indigo-600 mb-2";
-        setText(h2, unit);
-
-        const p1 = document.createElement("p");
-        p1.className = "text-sm text-gray-600";
-        p1.innerHTML = `Jumlah Total Paket: <span class="font-semibold">${escapeHTML(jumlah)}</span>`;
-
-        const p2 = document.createElement("p");
-        p2.className = "text-sm text-gray-600 mb-4";
-        p2.innerHTML = `Total Pagu Anggaran: <span class="font-semibold">${escapeHTML(formatRupiahCSV(pagu))}</span>`;
-
-        const grid = document.createElement("div");
-        grid.className = "grid grid-cols-1 md:grid-cols-3 gap-6";
-
-        const b1 = document.createElement("div");
-        b1.className = "p-4 rounded-lg border bg-indigo-50";
-        b1.innerHTML = `
-          <h3 class="font-semibold text-lg mb-2">Persiapan</h3>
-          <p class="text-2xl font-bold text-indigo-700">${persiapan}</p>
-          <p class="text-gray-600">(${persiapanPct}% paket)</p>
-          <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiPersiapan)} (${paguPersiapanPct}% pagu)</p>
-        `;
-
-        const b2 = document.createElement("div");
-        b2.className = "p-4 rounded-lg border bg-green-50";
-        b2.innerHTML = `
-          <h3 class="font-semibold text-lg mb-2">Berkontrak</h3>
-          <p class="text-2xl font-bold text-green-700">${berkontrak}</p>
-          <p class="text-gray-600">(${berkontrakPct}% paket)</p>
-          <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiBerkontrak)} (${paguBerkontrakPct}% pagu)</p>
-        `;
-
-        const b3 = document.createElement("div");
-        b3.className = "p-4 rounded-lg border bg-blue-50";
-        b3.innerHTML = `
-          <h3 class="font-semibold text-lg mb-2">Selesai</h3>
-          <p class="text-2xl font-bold text-blue-700">${selesai}</p>
-          <p class="text-gray-600">(${selesaiPct}% paket)</p>
-          <p class="text-sm text-gray-500 mb-3">${formatRupiahCSV(nilaiSelesai)} (${paguSelesaiPct}% pagu)</p>
-        `;
-
-        grid.append(b1,b2,b3);
-        card.append(h2,p1,p2,grid);
+          </div>`;
         container.appendChild(card);
       });
     }
 
+    // ✅ Loader utama
     async function fetchData(){
-      const res  = await fetch(safeURL(csvUrl));
-      const text = await res.text();
-      const rows = parseCSV(text.trim());
-      renderDashboard(rows.slice(1)); // buang header
+      const res=await fetch(safeURL(csvUrl));
+      const text=await res.text();
+      const rows=parseCSV(text.trim());
+      renderDashboard(rows.slice(1));
     }
 
-    document.addEventListener('DOMContentLoaded', fetchData);
+    document.addEventListener('DOMContentLoaded',fetchData);
   </script>
+
 
   <!-- Footer Dark -->
 <footer class="mt-12 w-full bg-black/40 backdrop-blur-sm py-4 shadow-inner animate__animated animate__fadeInUp">
@@ -581,8 +567,6 @@
 
 </body>
 </html>
-
-
 
 
 
