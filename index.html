@@ -569,9 +569,9 @@
         ${card("Nilai Kontrak (Berkontrak)", fIDR(d.nilaiKontrakBerkontrak))}
         ${card("Selesai", fInt(d.selesai), fPct(d.pctPaketSelesai), d.pctPaketSelesai, "green")}
         ${card("Nilai Kontrak (selesai)", fIDR(d.nilaiKontrakSelesai), fPct(d.pctNilaiKontrakSelesai), d.pctNilaiKontrakSelesai, "teal")}
-        ${card("Prognosis 30 Sept 2025", fIDR(d.prognosisSept), fPct(d.pctPrognosisSept), d.pctPrognosisSept, "cyan")}
-        ${card("Prognosis 31 Okt 2025", fIDR(d.prognosisOkt), fPct(d.pctPrognosisOkt), d.pctPrognosisOkt, "lime")}
-        ${card("Prognosis 30 Nov 2025", fIDR(d.prognosisNov), fPct(d.pctPrognosisNov), d.pctPrognosisNov, "green")}
+        ${card("Target Capaian Realisasi Triwulan 1 per 31 Maret 2026", fIDR(d.Realisasi), fPct(d.pctRealisasi), d.pctRealisasi, "cyan")}
+        ${card("Prognosis", fIDR(d.prognosisOkt), fPct(d.pctPrognosisOkt), d.pctPrognosisOkt, "lime")}
+        ${card("Prognosis", fIDR(d.prognosisNov), fPct(d.pctPrognosisNov), d.pctPrognosisNov, "green")}
       `;
 
       const ctx = document.getElementById('prognosisChartTop')?.getContext('2d');
