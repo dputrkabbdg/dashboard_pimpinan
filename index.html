@@ -14,15 +14,14 @@
   <!-- Animate.css CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-  <!-- Chart.js for line chart -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root { --card-w: 240px; --card-h: 160px; }
     body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
 
-    /* 🔹 Header background warna solid hijau DPUTR */
-    .header-bg { 
+    .header-bg {
       background-color: #1F6366;
       height: 100vh;
       position: relative;
@@ -30,12 +29,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
 
     .wave {
@@ -50,6 +43,7 @@
       opacity: 0.9;
       z-index: 5;
     }
+
     @keyframes waveMove {
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
@@ -73,6 +67,7 @@
       position: relative;
       overflow: hidden;
     }
+
     .dashboard-card::before {
       content: "";
       position: absolute;
@@ -82,12 +77,14 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
+
     .dashboard-card:hover::before { opacity: 1; }
     .dashboard-card:hover {
       transform: translateY(-6px) scale(1.04);
       box-shadow: 0 12px 28px rgba(0,0,0,0.18);
     }
     .dashboard-card:active { transform: scale(0.97); }
+
     .dashboard-card .card-img {
       width: 72px;
       height: 72px;
@@ -97,10 +94,12 @@
       position: relative;
       z-index: 1;
     }
+
     .dashboard-card:hover .card-img {
       transform: scale(1.15) rotate(3deg);
       filter: drop-shadow(0 0 12px rgba(59,130,246,0.5));
     }
+
     .dashboard-card .card-text {
       font-weight: 700;
       color: #1f2937;
@@ -110,7 +109,6 @@
       z-index: 1;
     }
 
-    /* status refresh */
     .refresh-badge{
       position: fixed;
       right: 14px;
@@ -134,7 +132,6 @@
     .refresh-badge.error .dot{ background:#ef4444; }
   </style>
 
-  <!-- Helper Sanitasi + Helper Refresh -->
   <script>
     const ALLOWED_URL_RE = /^(https?:|mailto:|tel:)/i;
 
@@ -161,11 +158,8 @@
 
     function setText(el, v) { el.textContent = sanitizeText(v); }
 
-    // =========================
-    // MODIFIKASI BARU
-    // =========================
-    const AUTO_REFRESH_MS = 30000;   // 30 detik
-    const FETCH_TIMEOUT_MS = 20000;  // 20 detik
+    const AUTO_REFRESH_MS = 30000;
+    const FETCH_TIMEOUT_MS = 20000;
     let autoRefreshTimer = null;
     let prognosisChartInstance = null;
     let isRefreshing = false;
@@ -192,10 +186,7 @@
           signal: controller.signal
         });
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        }
-
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
         return await res.text();
       } finally {
         clearTimeout(timer);
@@ -218,7 +209,6 @@
       const badge = document.getElementById('refresh-status');
       if(!badge) return;
       badge.classList.remove('loading', 'error');
-
       if(state === 'loading') badge.classList.add('loading');
       if(state === 'error') badge.classList.add('error');
 
@@ -238,7 +228,7 @@
           if (ch === '"'){ inQ = true; }
           else if (ch === ','){ row.push(cur); cur = ""; }
           else if (ch === '\n'){ row.push(cur); rows.push(row); row=[]; cur=""; }
-          else if (ch === '\r'){ /* ignore */ }
+          else if (ch === '\r'){ }
           else { cur += ch; }
         }
       }
@@ -247,14 +237,13 @@
       return rows;
     }
 
-    async function refreshAllData(forceMessage = false){
+    async function refreshAllData(){
       if(isRefreshing) return;
       isRefreshing = true;
       setRefreshStatus('loading', 'Memuat data terbaru...');
 
       try{
         const jobs = [];
-
         if (typeof fetchRekap === 'function') jobs.push(fetchRekap());
         if (typeof fetchData === 'function') jobs.push(fetchData());
         if (typeof loadTableData === 'function') jobs.push(loadTableData());
@@ -289,7 +278,6 @@
 
 <body class="bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 min-h-screen flex flex-col items-center justify-start">
 
-  <!-- Header -->
   <div class="header-bg w-full relative">
     <div class="absolute inset-0 bg-black/30 z-0"></div>
     <div id="rain-container"></div>
@@ -310,14 +298,15 @@
     <div class="wave"></div>
   </div>
 
-  <!-- RINGKASAN REKAP DINAS -->
   <div class="w-full max-w-7xl px-4 sm:px-6 -mt-10 mb-10">
     <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6">
-      <h2 class="text-xl md:text-2xl font-bold text-teal-700 mb-6 text-center">📊 Rekap Pekerjaan Fisik, Non Fisik dan Belanja Umum DPUTR Kab.Bandung</h2>
-
+      <h2 id="rekap-title" class="text-xl md:text-2xl font-bold text-teal-700 mb-6 text-center">
+        📊 Rekap Pekerjaan Fisik, Non Fisik dan Belanja Umum DPUTR Kab.Bandung
+      </h2>
       <div id="rekap-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10"></div>
 
-      <!-- Kalau nanti ingin chart diaktifkan lagi, tinggal buka komentar ini
+      <!-- kalau mau chart diaktifkan lagi tinggal buka komentar -->
+      <!--
       <div class="bg-white/80 rounded-2xl shadow p-4">
         <h3 class="text-center text-teal-700 font-semibold mb-3">📈 Tren Prognosis</h3>
         <canvas id="prognosisChartTop"></canvas>
@@ -326,13 +315,11 @@
     </div>
   </div>
 
-  <!-- Dashboard Progress -->
   <div class="w-full max-w-[1500px] xl:max-w-[1600px] px-4 sm:px-6 mt-6 mb-6">
     <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-6 text-center">📊 Progres Kegiatan Per Unit Kerja DPUTR TA 2026</h2>
     <div id="dashboard" class="space-y-10"></div>
   </div>
 
-  <!-- Grid cards -->
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 px-4 sm:px-6 w-full max-w-[1500px] xl:max-w-[1600px] mb-10 justify-items-center">
     <a href="https://sites.google.com/view/bidang-jalan/progres-pekerjaan-bidang-jalan" class="dashboard-card animate__animated animate__fadeInUp delay-1" aria-label="Bidang Jalan">
       <img src="https://img.icons8.com/color/80/road.png" alt="Bidang Jalan" class="card-img mb-2" />
@@ -390,11 +377,10 @@
       <img src="https://img.icons8.com/color/80/artificial-intelligence.png" alt="Tanya AI" class="card-img mb-2" />
       <span class="card-text">Tanya AI</span>
     </a>
-  </div> 
+  </div>
 
-  <!-- Data tabel dari Sheet (opsional) -->
   <script>
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1875135079&single=true&output=csv";
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQfPFj1SxjErXTz4pwoIioVXnA90uqCEjPBDPhnNi6y9j5yPv59-LWTwNlCdg4mNtDgMkktWjt2mWM/pub?gid=0&single=true&output=csv";
 
     function toNumber(val){
       if (val == null) return NaN;
@@ -436,14 +422,14 @@
         if (!headerRow || !tbody) return;
 
         const idxPagu = header.findIndex(h => h.toLowerCase().includes("pagu"));
-        const idxKontrakAll = header
-          .map((h,i)=>({h,i}))
+        const idxKontrakAll = header.map((h,i)=>({h,i}))
           .filter(({h})=>h.toLowerCase().includes("nilai kontrak"))
           .map(({i})=>i);
         const idxKontrak = idxKontrakAll.length ? idxKontrakAll[idxKontrakAll.length-1] : -1;
 
         let idxPersenPagu = header.findIndex(h => h.toLowerCase().includes("persentase") && h.toLowerCase().includes("pagu"));
         let addComputed = false;
+
         if (idxPersenPagu === -1) {
           header.push("PERSENTASE TERHADAP PAGU");
           idxPersenPagu = header.length - 1;
@@ -502,42 +488,83 @@
     }
   </script>
 
-  <!-- SCRIPT REKAP DINAS TOP -->
+  <!-- REKAP DINAS DINAMIS -->
   <script>
     const CSV_REKAP_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1853757195&single=true&output=csv";
 
-    const fIDR = n => isNaN(n) ? '-' :
-      new Intl.NumberFormat('id-ID',{
-        style:'currency',
-        currency:'IDR',
-        maximumFractionDigits:0
-      }).format(n);
-
-    const fInt = n => isNaN(n) ? '-' : new Intl.NumberFormat('id-ID').format(n);
-    const fPct = n => isNaN(n) ? '-' : `${(+n).toFixed(2)}%`;
-
-    function toNumRekap(s){
-      if (s == null) return 0;
-      let raw = String(s).trim();
-      if (!raw) return 0;
-
-      // Tangani persen & angka Indonesia
-      raw = raw.replace(/[^\d,.-]/g,'');
-      raw = raw.replace(/\.(?=\d{3}(\D|$))/g,'');
-      raw = raw.replace(',', '.');
-
-      const n = parseFloat(raw);
-      return isNaN(n) ? 0 : n;
+    function toNumID(v){
+      if (v == null) return NaN;
+      let s = String(v).trim();
+      if (!s) return NaN;
+      s = s.replace(/\s/g, '');
+      s = s.replace(/[^\d,.-]/g, '');
+      s = s.replace(/\.(?=\d{3}(\D|$))/g, '');
+      s = s.replace(',', '.');
+      const n = parseFloat(s);
+      return isNaN(n) ? NaN : n;
     }
 
-    function card(title, main, sub, prog, color="teal"){
-      const bar =
-        color === "green" ? "bg-green-500" :
-        color === "cyan"  ? "bg-cyan-500"  :
-        color === "lime"  ? "bg-lime-500"  : "bg-teal-500";
+    function isPercentString(v){
+      return String(v ?? '').includes('%');
+    }
 
+    function parsePercent(v){
+      if (v == null) return NaN;
+      const s = String(v).trim();
+      if (!s) return NaN;
+      if (s.includes('%')) {
+        const n = toNumID(s);
+        return isNaN(n) ? NaN : n;
+      }
+      let n = toNumID(s);
+      if (isNaN(n)) return NaN;
+      if (n <= 1) n *= 100;
+      return n;
+    }
+
+    function isErrorCell(v){
+      const s = String(v ?? '').trim().toUpperCase();
+      return s === '#REF!' || s === '#N/A' || s === '#VALUE!' || s === '#DIV/0!' || s === '#NAME?' || s === '#ERROR!';
+    }
+
+    function formatMainValueByHeader(header, value){
+      const h = String(header || '').toLowerCase();
+      const raw = String(value ?? '').trim();
+      const num = toNumID(raw);
+
+      if (raw === '') return '-';
+
+      if (h.includes('persentase') || h.includes('progres') || h.includes('capaian') || isPercentString(raw)) {
+        const p = parsePercent(raw);
+        return isNaN(p) ? raw : `${p.toFixed(2)}%`;
+      }
+
+      if (h.includes('anggaran') || h.includes('pagu') || h.includes('belanja') || h.includes('nilai kontrak')) {
+        return isNaN(num) ? raw : new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0
+        }).format(num);
+      }
+
+      if (!isNaN(num)) {
+        return new Intl.NumberFormat('id-ID').format(num);
+      }
+
+      return raw;
+    }
+
+    function getBarColorByHeader(header){
+      const h = String(header || '').toLowerCase();
+      if (h.includes('selesai')) return 'bg-green-500';
+      if (h.includes('prognosis')) return 'bg-cyan-500';
+      if (h.includes('target') || h.includes('capaian')) return 'bg-sky-500';
+      if (h.includes('berkontrak')) return 'bg-teal-500';
+      return 'bg-teal-500';
+    }
+
+    function cardDynamic(title, main, sub, prog, colorClass){
       const hasProg = prog !== undefined && !isNaN(prog);
-
       return `
         <div class="bg-white/90 border border-teal-100 p-4 rounded-2xl shadow hover:shadow-lg transition text-center">
           <h2 class="text-sm font-semibold mb-2 text-gray-600">${escapeHTML(title)}</h2>
@@ -545,49 +572,81 @@
           ${sub ? `<p class="mt-1 text-sm text-gray-500">${escapeHTML(sub)}</p>` : ``}
           ${hasProg ? `
             <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-              <div class="${bar} h-2 rounded-full" style="width:${Math.max(0, Math.min(100, prog))}%;"></div>
+              <div class="${colorClass} h-2 rounded-full" style="width:${Math.max(0, Math.min(100, prog))}%;"></div>
             </div>` : ``}
         </div>
       `;
     }
 
-    function renderRekap(d){
+    function renderRekapFromSheet(headers, dataRow, percentRow){
       const wrap = document.getElementById('rekap-cards');
       if(!wrap) return;
 
-      wrap.innerHTML = `
-        ${card("Total Paket", fInt(d.totalPaket))}
-        ${card("Total Anggaran", fIDR(d.totalAnggaran))}
-        ${card("Pekerjaan Fisik", fInt(d.pekerjaanFisik))}
-        ${card("Pagu Fisik", fIDR(d.paguFisik))}
-        ${card("Non Fisik", fInt(d.nonFisik))}
-        ${card("Pagu Non Fisik", fIDR(d.paguNonFisik))}
-        ${card("Belanja Umum", fIDR(d.belanjaUmum))}
-        ${card("Persiapan/Pengadaan", fInt(d.persiapanPengadaan))}
-        ${card("Pagu Pengadaan", fIDR(d.paguPengadaan))}
-        ${card("Berkontrak", fInt(d.berkontrak))}
-        ${card("Nilai Kontrak (Berkontrak)", fIDR(d.nilaiKontrakBerkontrak))}
-        ${card("Selesai", fInt(d.selesai), fPct(d.pctPaketSelesai), d.pctPaketSelesai, "green")}
-        ${card("Nilai Kontrak (selesai)", fIDR(d.nilaiKontrakSelesai), fPct(d.pctNilaiKontrakSelesai), d.pctNilaiKontrakSelesai, "teal")}
-        ${card("Target Capaian Realisasi Triwulan 1 per 31 Maret 2026", fIDR(d.Realisasi), fPct(d.pctRealisasi), d.pctRealisasi, "cyan")}
-        ${card("Prognosis", fIDR(d.prognosisOkt), fPct(d.pctPrognosisOkt), d.pctPrognosisOkt, "lime")}
-        ${card("Prognosis", fIDR(d.prognosisNov), fPct(d.pctPrognosisNov), d.pctPrognosisNov, "green")}
-      `;
+      const cards = [];
 
-      const ctx = document.getElementById('prognosisChartTop')?.getContext('2d');
-      if(!ctx) return;
+      headers.forEach((header, idx) => {
+        const title = sanitizeText(header);
+        const rawValue = dataRow[idx] ?? '';
+        const rawPercent = percentRow ? (percentRow[idx] ?? '') : '';
 
-      if (prognosisChartInstance) {
-        prognosisChartInstance.destroy();
-      }
+        if (!title) return;
+        if (String(rawValue).trim() === '' && String(rawPercent).trim() === '') return;
+        if (isErrorCell(rawValue)) return;
+
+        const main = formatMainValueByHeader(title, rawValue);
+
+        let sub = '';
+        let prog = NaN;
+
+        if (!isErrorCell(rawPercent) && String(rawPercent).trim() !== '') {
+          const pct = parsePercent(rawPercent);
+          if (!isNaN(pct)) {
+            sub = `${pct.toFixed(2)}%`;
+            prog = pct;
+          } else {
+            sub = sanitizeText(rawPercent);
+          }
+        }
+
+        cards.push(cardDynamic(
+          title,
+          main,
+          sub,
+          prog,
+          getBarColorByHeader(title)
+        ));
+      });
+
+      wrap.innerHTML = cards.join('');
+    }
+
+    function buildPrognosisChart(headers, dataRow){
+      const canvas = document.getElementById('prognosisChartTop');
+      if(!canvas) return;
+
+      const prognosisItems = [];
+      headers.forEach((h, i) => {
+        const hh = String(h || '').toLowerCase();
+        if (hh.includes('prognosis') || hh.includes('target') || hh.includes('capaian')) {
+          const val = toNumID(dataRow[i]);
+          if (!isNaN(val) && !isErrorCell(dataRow[i])) {
+            prognosisItems.push({ label: sanitizeText(h), value: val });
+          }
+        }
+      });
+
+      if (!prognosisItems.length) return;
+
+      const ctx = canvas.getContext('2d');
+      if (prognosisChartInstance) prognosisChartInstance.destroy();
 
       prognosisChartInstance = new Chart(ctx,{
         type:'line',
         data:{
-          labels:["30 Sept 2025","31 Okt 2025","30 Nov 2025"],
+          labels: prognosisItems.map(x => x.label),
           datasets:[{
             label:'Nilai Prognosis',
-            data:[d.prognosisSept,d.prognosisOkt,d.prognosisNov],
+            data: prognosisItems.map(x => x.value),
             borderColor:'#14b8a6',
             backgroundColor:'rgba(20,184,166,0.15)',
             borderWidth:3,
@@ -601,7 +660,7 @@
           plugins:{ legend:{ labels:{ color:'#0f766e' } } },
           scales:{
             x:{ ticks:{ color:'#0f766e' }, grid:{ color:'rgba(0,0,0,0.05)' } },
-            y:{ ticks:{ color:'#0f766e', callback:v=>fIDR(v) }, grid:{ color:'rgba(0,0,0,0.05)' } }
+            y:{ ticks:{ color:'#0f766e' }, grid:{ color:'rgba(0,0,0,0.05)' } }
           }
         }
       });
@@ -610,39 +669,17 @@
     async function fetchRekap(){
       try{
         const text = await fetchTextNoCache(CSV_REKAP_URL);
-        const rows = parseCSV(text.trim());
+        const rows = parseCSV(text.trim()).filter(r => r.some(c => String(c).trim() !== ''));
 
-        const dataRow = (rows.slice(1).find(r => r.some(c => String(c).trim() !== ""))) || rows[1] || [];
+        if (!rows.length) return;
 
-        const totalPaket             = toNumRekap(dataRow[0]);
-        const totalAnggaran          = toNumRekap(dataRow[1]);
-        const pekerjaanFisik         = toNumRekap(dataRow[2]);
-        const paguFisik              = toNumRekap(dataRow[3]);
-        const nonFisik               = toNumRekap(dataRow[4]);
-        const paguNonFisik           = toNumRekap(dataRow[5]);
-        const belanjaUmum            = toNumRekap(dataRow[6]);
-        const persiapanPengadaan     = toNumRekap(dataRow[7]);
-        const paguPengadaan          = toNumRekap(dataRow[8]);
-        const berkontrak             = toNumRekap(dataRow[9]);
-        const nilaiKontrakBerkontrak = toNumRekap(dataRow[10]);
-        const selesai                = toNumRekap(dataRow[11]);
-        const nilaiKontrakSelesai    = toNumRekap(dataRow[12]);
-        const prognosisSept          = toNumRekap(dataRow[13]);
-        const prognosisOkt           = toNumRekap(dataRow[14]);
-        const prognosisNov           = toNumRekap(dataRow[15]);
+        const headers = (rows[0] || []).map(h => sanitizeText(h));
+        const dataRow = rows[1] || [];
+        const percentRow = rows[2] || [];
 
-        renderRekap({
-          totalPaket, totalAnggaran, pekerjaanFisik, paguFisik,
-          nonFisik, paguNonFisik, belanjaUmum, persiapanPengadaan,
-          paguPengadaan, berkontrak, nilaiKontrakBerkontrak,
-          selesai, nilaiKontrakSelesai, prognosisSept, prognosisOkt, prognosisNov,
-          pctPaketSelesai: totalPaket > 0 ? (selesai / totalPaket * 100) : 0,
-          pctNilaiKontrakSelesai: totalAnggaran > 0 ? (nilaiKontrakSelesai / totalAnggaran * 100) : 0,
-          pctPrognosisSept: totalAnggaran > 0 ? (prognosisSept / totalAnggaran * 100) : 0,
-          pctPrognosisOkt: totalAnggaran > 0 ? (prognosisOkt / totalAnggaran * 100) : 0,
-          pctPrognosisNov: totalAnggaran > 0 ? (prognosisNov / totalAnggaran * 100) : 0
-        });
-      } catch(e){
+        renderRekapFromSheet(headers, dataRow, percentRow);
+        buildPrognosisChart(headers, dataRow);
+      }catch(e){
         console.error("Gagal memuat rekap dinas:", e);
         throw e;
       }
@@ -731,7 +768,6 @@
     }
   </script>
 
-  <!-- Footer -->
   <footer class="mt-12 w-full bg-black/40 backdrop-blur-sm py-4 shadow-inner animate__animated animate__fadeInUp">
     <div class="flex flex-col sm:flex-row items-center justify-center gap-3 text-white">
       <img src="assets/DPUTR HIJAU.png" class="h-10 w-10 object-contain" alt="DPUTR"/>
@@ -741,7 +777,6 @@
     </div>
   </footer>
 
-  <!-- Badge status refresh -->
   <div id="refresh-status" class="refresh-badge">
     <span class="dot"></span>
     <span id="refresh-status-text">Menunggu pemuatan data...</span>
@@ -751,7 +786,7 @@
     document.getElementById("year").textContent = new Date().getFullYear();
 
     document.addEventListener('DOMContentLoaded', async () => {
-      await refreshAllData(true);
+      await refreshAllData();
       startAutoRefresh();
     });
 
