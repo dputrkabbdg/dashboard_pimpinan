@@ -489,202 +489,220 @@
   </script>
 
   <!-- REKAP DINAS DINAMIS -->
-  <script>
-    const CSV_REKAP_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1853757195&single=true&output=csv";
+<script>
+  const CSV_REKAP_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1853757195&single=true&output=csv";
 
-    function toNumID(v){
-      if (v == null) return NaN;
-      let s = String(v).trim();
-      if (!s) return NaN;
-      s = s.replace(/\s/g, '');
-      s = s.replace(/[^\d,.-]/g, '');
-      s = s.replace(/\.(?=\d{3}(\D|$))/g, '');
-      s = s.replace(',', '.');
-      const n = parseFloat(s);
+  function toNumID(v){
+    if (v == null) return NaN;
+    let s = String(v).trim();
+    if (!s) return NaN;
+    s = s.replace(/\s/g, '');
+    s = s.replace(/[^\d,.-]/g, '');
+    s = s.replace(/\.(?=\d{3}(\D|$))/g, '');
+    s = s.replace(',', '.');
+    const n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  }
+
+  function isPercentString(v){
+    return String(v ?? '').includes('%');
+  }
+
+  function parsePercent(v){
+    if (v == null) return NaN;
+    const s = String(v).trim();
+    if (!s) return NaN;
+
+    if (s.includes('%')) {
+      const n = toNumID(s);
       return isNaN(n) ? NaN : n;
     }
 
-    function isPercentString(v){
-      return String(v ?? '').includes('%');
+    let n = toNumID(s);
+    if (isNaN(n)) return NaN;
+    if (n <= 1) n *= 100;
+    return n;
+  }
+
+  function isErrorCell(v){
+    const s = String(v ?? '').trim().toUpperCase();
+    return s === '#REF!' || s === '#N/A' || s === '#VALUE!' || s === '#DIV/0!' || s === '#NAME?' || s === '#ERROR!';
+  }
+
+  // =========================
+  // PERBAIKAN UTAMA DI SINI
+  // =========================
+  function formatMainValueByHeader(header, value){
+    const h = String(header || '').toLowerCase();
+    const raw = String(value ?? '').trim();
+    const num = toNumID(raw);
+
+    if (raw === '') return '-';
+
+    // Nilai utama hanya jadi persen kalau isi cell memang persen
+    if (isPercentString(raw)) {
+      const p = parsePercent(raw);
+      return isNaN(p) ? raw : `${p.toFixed(2)}%`;
     }
 
-    function parsePercent(v){
-      if (v == null) return NaN;
-      const s = String(v).trim();
-      if (!s) return NaN;
-      if (s.includes('%')) {
-        const n = toNumID(s);
-        return isNaN(n) ? NaN : n;
-      }
-      let n = toNumID(s);
-      if (isNaN(n)) return NaN;
-      if (n <= 1) n *= 100;
-      return n;
+    // Kalau header bernuansa uang, tampilkan Rupiah
+    if (
+      h.includes('anggaran') ||
+      h.includes('pagu') ||
+      h.includes('belanja') ||
+      h.includes('nilai kontrak') ||
+      h.includes('target capaian') ||
+      h.includes('prognosis')
+    ) {
+      return isNaN(num)
+        ? raw
+        : new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            maximumFractionDigits: 0
+          }).format(num);
     }
 
-    function isErrorCell(v){
-      const s = String(v ?? '').trim().toUpperCase();
-      return s === '#REF!' || s === '#N/A' || s === '#VALUE!' || s === '#DIV/0!' || s === '#NAME?' || s === '#ERROR!';
+    // Angka biasa
+    if (!isNaN(num)) {
+      return new Intl.NumberFormat('id-ID').format(num);
     }
 
-    function formatMainValueByHeader(header, value){
-      const h = String(header || '').toLowerCase();
-      const raw = String(value ?? '').trim();
-      const num = toNumID(raw);
+    return raw;
+  }
 
-      if (raw === '') return '-';
+  function getBarColorByHeader(header){
+    const h = String(header || '').toLowerCase();
+    if (h.includes('selesai')) return 'bg-green-500';
+    if (h.includes('prognosis')) return 'bg-cyan-500';
+    if (h.includes('target') || h.includes('capaian')) return 'bg-sky-500';
+    if (h.includes('berkontrak')) return 'bg-teal-500';
+    return 'bg-teal-500';
+  }
 
-      if (h.includes('persentase') || h.includes('progres') || h.includes('capaian') || isPercentString(raw)) {
-        const p = parsePercent(raw);
-        return isNaN(p) ? raw : `${p.toFixed(2)}%`;
-      }
+  function cardDynamic(title, main, sub, prog, colorClass){
+    const hasProg = prog !== undefined && !isNaN(prog);
+    return `
+      <div class="bg-white/90 border border-teal-100 p-4 rounded-2xl shadow hover:shadow-lg transition text-center">
+        <h2 class="text-sm font-semibold mb-2 text-gray-600">${escapeHTML(title)}</h2>
+        <p class="text-xl font-bold text-teal-700">${escapeHTML(main)}</p>
+        ${sub ? `<p class="mt-1 text-sm text-gray-500">${escapeHTML(sub)}</p>` : ``}
+        ${hasProg ? `
+          <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div class="${colorClass} h-2 rounded-full" style="width:${Math.max(0, Math.min(100, prog))}%;"></div>
+          </div>` : ``}
+      </div>
+    `;
+  }
 
-      if (h.includes('anggaran') || h.includes('pagu') || h.includes('belanja') || h.includes('nilai kontrak')) {
-        return isNaN(num) ? raw : new Intl.NumberFormat('id-ID', {
-          style: 'currency',
-          currency: 'IDR',
-          maximumFractionDigits: 0
-        }).format(num);
-      }
+  function renderRekapFromSheet(headers, dataRow, percentRow){
+    const wrap = document.getElementById('rekap-cards');
+    if(!wrap) return;
 
-      if (!isNaN(num)) {
-        return new Intl.NumberFormat('id-ID').format(num);
-      }
+    const cards = [];
 
-      return raw;
-    }
+    headers.forEach((header, idx) => {
+      const title = sanitizeText(header);
+      const rawValue = dataRow[idx] ?? '';
+      const rawPercent = percentRow ? (percentRow[idx] ?? '') : '';
 
-    function getBarColorByHeader(header){
-      const h = String(header || '').toLowerCase();
-      if (h.includes('selesai')) return 'bg-green-500';
-      if (h.includes('prognosis')) return 'bg-cyan-500';
-      if (h.includes('target') || h.includes('capaian')) return 'bg-sky-500';
-      if (h.includes('berkontrak')) return 'bg-teal-500';
-      return 'bg-teal-500';
-    }
+      if (!title) return;
+      if (String(rawValue).trim() === '' && String(rawPercent).trim() === '') return;
+      if (isErrorCell(rawValue)) return;
 
-    function cardDynamic(title, main, sub, prog, colorClass){
-      const hasProg = prog !== undefined && !isNaN(prog);
-      return `
-        <div class="bg-white/90 border border-teal-100 p-4 rounded-2xl shadow hover:shadow-lg transition text-center">
-          <h2 class="text-sm font-semibold mb-2 text-gray-600">${escapeHTML(title)}</h2>
-          <p class="text-xl font-bold text-teal-700">${escapeHTML(main)}</p>
-          ${sub ? `<p class="mt-1 text-sm text-gray-500">${escapeHTML(sub)}</p>` : ``}
-          ${hasProg ? `
-            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-              <div class="${colorClass} h-2 rounded-full" style="width:${Math.max(0, Math.min(100, prog))}%;"></div>
-            </div>` : ``}
-        </div>
-      `;
-    }
+      const main = formatMainValueByHeader(title, rawValue);
 
-    function renderRekapFromSheet(headers, dataRow, percentRow){
-      const wrap = document.getElementById('rekap-cards');
-      if(!wrap) return;
+      let sub = '';
+      let prog = NaN;
 
-      const cards = [];
-
-      headers.forEach((header, idx) => {
-        const title = sanitizeText(header);
-        const rawValue = dataRow[idx] ?? '';
-        const rawPercent = percentRow ? (percentRow[idx] ?? '') : '';
-
-        if (!title) return;
-        if (String(rawValue).trim() === '' && String(rawPercent).trim() === '') return;
-        if (isErrorCell(rawValue)) return;
-
-        const main = formatMainValueByHeader(title, rawValue);
-
-        let sub = '';
-        let prog = NaN;
-
-        if (!isErrorCell(rawPercent) && String(rawPercent).trim() !== '') {
-          const pct = parsePercent(rawPercent);
-          if (!isNaN(pct)) {
-            sub = `${pct.toFixed(2)}%`;
-            prog = pct;
-          } else {
-            sub = sanitizeText(rawPercent);
-          }
+      // persen/progress tetap diambil dari baris bawah
+      if (!isErrorCell(rawPercent) && String(rawPercent).trim() !== '') {
+        const pct = parsePercent(rawPercent);
+        if (!isNaN(pct)) {
+          sub = `${pct.toFixed(2)}%`;
+          prog = pct;
+        } else {
+          sub = sanitizeText(rawPercent);
         }
-
-        cards.push(cardDynamic(
-          title,
-          main,
-          sub,
-          prog,
-          getBarColorByHeader(title)
-        ));
-      });
-
-      wrap.innerHTML = cards.join('');
-    }
-
-    function buildPrognosisChart(headers, dataRow){
-      const canvas = document.getElementById('prognosisChartTop');
-      if(!canvas) return;
-
-      const prognosisItems = [];
-      headers.forEach((h, i) => {
-        const hh = String(h || '').toLowerCase();
-        if (hh.includes('prognosis') || hh.includes('target') || hh.includes('capaian')) {
-          const val = toNumID(dataRow[i]);
-          if (!isNaN(val) && !isErrorCell(dataRow[i])) {
-            prognosisItems.push({ label: sanitizeText(h), value: val });
-          }
-        }
-      });
-
-      if (!prognosisItems.length) return;
-
-      const ctx = canvas.getContext('2d');
-      if (prognosisChartInstance) prognosisChartInstance.destroy();
-
-      prognosisChartInstance = new Chart(ctx,{
-        type:'line',
-        data:{
-          labels: prognosisItems.map(x => x.label),
-          datasets:[{
-            label:'Nilai Prognosis',
-            data: prognosisItems.map(x => x.value),
-            borderColor:'#14b8a6',
-            backgroundColor:'rgba(20,184,166,0.15)',
-            borderWidth:3,
-            pointBackgroundColor:'#0d9488',
-            pointRadius:6,
-            tension:0.3
-          }]
-        },
-        options:{
-          responsive:true,
-          plugins:{ legend:{ labels:{ color:'#0f766e' } } },
-          scales:{
-            x:{ ticks:{ color:'#0f766e' }, grid:{ color:'rgba(0,0,0,0.05)' } },
-            y:{ ticks:{ color:'#0f766e' }, grid:{ color:'rgba(0,0,0,0.05)' } }
-          }
-        }
-      });
-    }
-
-    async function fetchRekap(){
-      try{
-        const text = await fetchTextNoCache(CSV_REKAP_URL);
-        const rows = parseCSV(text.trim()).filter(r => r.some(c => String(c).trim() !== ''));
-
-        if (!rows.length) return;
-
-        const headers = (rows[0] || []).map(h => sanitizeText(h));
-        const dataRow = rows[1] || [];
-        const percentRow = rows[2] || [];
-
-        renderRekapFromSheet(headers, dataRow, percentRow);
-        buildPrognosisChart(headers, dataRow);
-      }catch(e){
-        console.error("Gagal memuat rekap dinas:", e);
-        throw e;
       }
+
+      cards.push(cardDynamic(
+        title,
+        main,
+        sub,
+        prog,
+        getBarColorByHeader(title)
+      ));
+    });
+
+    wrap.innerHTML = cards.join('');
+  }
+
+  function buildPrognosisChart(headers, dataRow){
+    const canvas = document.getElementById('prognosisChartTop');
+    if(!canvas) return;
+
+    const prognosisItems = [];
+    headers.forEach((h, i) => {
+      const hh = String(h || '').toLowerCase();
+      if (hh.includes('prognosis') || hh.includes('target') || hh.includes('capaian')) {
+        const val = toNumID(dataRow[i]);
+        if (!isNaN(val) && !isErrorCell(dataRow[i])) {
+          prognosisItems.push({ label: sanitizeText(h), value: val });
+        }
+      }
+    });
+
+    if (!prognosisItems.length) return;
+
+    const ctx = canvas.getContext('2d');
+    if (prognosisChartInstance) prognosisChartInstance.destroy();
+
+    prognosisChartInstance = new Chart(ctx,{
+      type:'line',
+      data:{
+        labels: prognosisItems.map(x => x.label),
+        datasets:[{
+          label:'Nilai Prognosis',
+          data: prognosisItems.map(x => x.value),
+          borderColor:'#14b8a6',
+          backgroundColor:'rgba(20,184,166,0.15)',
+          borderWidth:3,
+          pointBackgroundColor:'#0d9488',
+          pointRadius:6,
+          tension:0.3
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{ legend:{ labels:{ color:'#0f766e' } } },
+        scales:{
+          x:{ ticks:{ color:'#0f766e' }, grid:{ color:'rgba(0,0,0,0.05)' } },
+          y:{ ticks:{ color:'#0f766e' }, grid:{ color:'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+  }
+
+  async function fetchRekap(){
+    try{
+      const text = await fetchTextNoCache(CSV_REKAP_URL);
+      const rows = parseCSV(text.trim()).filter(r => r.some(c => String(c).trim() !== ''));
+
+      if (!rows.length) return;
+
+      const headers = (rows[0] || []).map(h => sanitizeText(h));
+      const dataRow = rows[1] || [];
+      const percentRow = rows[2] || [];
+
+      renderRekapFromSheet(headers, dataRow, percentRow);
+      buildPrognosisChart(headers, dataRow);
+    }catch(e){
+      console.error("Gagal memuat rekap dinas:", e);
+      throw e;
     }
-  </script>
+  }
+</script>
 
   <!-- Dashboard Progress -->
   <script>
