@@ -21,41 +21,123 @@
     :root { --card-w: 240px; --card-h: 160px; }
     body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
 
-/* 🔹 Header background warna solid hijau DPUTR */
-.header-bg { 
-  background-color: #1F6366;
-  height: 100vh;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    /* 🔹 Header background warna solid hijau DPUTR */
+    .header-bg { 
+      background-color: #1F6366;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+    .wave {
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 200%;
+      height: 120px;
+      background: url('https://svgshare.com/i/uUu.svg') repeat-x;
+      background-size: 50% 120px;
+      animation: waveMove 8s linear infinite;
+      opacity: 0.9;
+      z-index: 5;
+    }
+    @keyframes waveMove {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
 
-
-    .wave { position: absolute; bottom: -1px; left: 0; width: 200%; height: 120px; background: url('https://svgshare.com/i/uUu.svg') repeat-x; background-size: 50% 120px; animation: waveMove 8s linear infinite; opacity: 0.9; z-index: 5; }
-    @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-    .dashboard-card { width: var(--card-w); height: var(--card-h); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1rem; border-radius: 18px; cursor: pointer; user-select: none; background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); box-shadow: 0 4px 16px rgba(0,0,0,0.08); transition: all 0.3s ease; position: relative; overflow: hidden; }
-    .dashboard-card::before { content: ""; position: absolute; inset: 0; border-radius: 18px; background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.15)); opacity: 0; transition: opacity 0.3s ease; }
+    .dashboard-card {
+      width: var(--card-w);
+      height: var(--card-h);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      border-radius: 18px;
+      cursor: pointer;
+      user-select: none;
+      background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .dashboard-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.15));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
     .dashboard-card:hover::before { opacity: 1; }
-    .dashboard-card:hover { transform: translateY(-6px) scale(1.04); box-shadow: 0 12px 28px rgba(0,0,0,0.18); }
+    .dashboard-card:hover {
+      transform: translateY(-6px) scale(1.04);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    }
     .dashboard-card:active { transform: scale(0.97); }
-    .dashboard-card .card-img { width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25)); transition: transform 0.3s ease, filter 0.3s ease; position: relative; z-index: 1; }
-    .dashboard-card:hover .card-img { transform: scale(1.15) rotate(3deg); filter: drop-shadow(0 0 12px rgba(59,130,246,0.5)); }
-    .dashboard-card .card-text { font-weight: 700; color: #1f2937; font-size: 1rem; margin-top: 0.5rem; position: relative; z-index: 1; }
+    .dashboard-card .card-img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
+      transition: transform 0.3s ease, filter 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .dashboard-card:hover .card-img {
+      transform: scale(1.15) rotate(3deg);
+      filter: drop-shadow(0 0 12px rgba(59,130,246,0.5));
+    }
+    .dashboard-card .card-text {
+      font-weight: 700;
+      color: #1f2937;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* status refresh */
+    .refresh-badge{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 9999;
+      background: rgba(17,24,39,.9);
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 8px 12px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
+      backdrop-filter: blur(8px);
+    }
+    .refresh-badge .dot{
+      display:inline-block;
+      width:8px;height:8px;border-radius:50%;
+      background:#22c55e;margin-right:6px;
+    }
+    .refresh-badge.loading .dot{ background:#f59e0b; }
+    .refresh-badge.error .dot{ background:#ef4444; }
   </style>
 
-  <!-- Helper Sanitasi -->
+  <!-- Helper Sanitasi + Helper Refresh -->
   <script>
     const ALLOWED_URL_RE = /^(https?:|mailto:|tel:)/i;
+
     function sanitizeText(v, max = 5000) {
       if (v == null) return '';
       v = String(v);
@@ -65,14 +147,143 @@
       if (/^[=+\-@]/.test(v)) v = "'" + v;
       return v.trim().slice(0, max);
     }
+
     function escapeHTML(s) {
-      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+      return String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
     }
+
     function safeURL(u) {
       const s = String(u || '').trim();
       return ALLOWED_URL_RE.test(s) ? s : '#';
     }
+
     function setText(el, v) { el.textContent = sanitizeText(v); }
+
+    // =========================
+    // MODIFIKASI BARU
+    // =========================
+    const AUTO_REFRESH_MS = 30000;   // 30 detik
+    const FETCH_TIMEOUT_MS = 20000;  // 20 detik
+    let autoRefreshTimer = null;
+    let prognosisChartInstance = null;
+    let isRefreshing = false;
+    let lastRefreshAt = null;
+
+    function buildFreshUrl(url){
+      const safe = safeURL(url);
+      const separator = safe.includes('?') ? '&' : '?';
+      return `${safe}${separator}_ts=${Date.now()}`;
+    }
+
+    async function fetchTextNoCache(url, timeoutMs = FETCH_TIMEOUT_MS){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try{
+        const res = await fetch(buildFreshUrl(url), {
+          method: 'GET',
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, max-age=0',
+            'Pragma': 'no-cache'
+          },
+          signal: controller.signal
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        }
+
+        return await res.text();
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function formatDateTimeID(d){
+      if(!d) return '-';
+      try{
+        return new Intl.DateTimeFormat('id-ID', {
+          dateStyle: 'short',
+          timeStyle: 'medium'
+        }).format(d);
+      }catch(e){
+        return d.toLocaleString('id-ID');
+      }
+    }
+
+    function setRefreshStatus(state, message){
+      const badge = document.getElementById('refresh-status');
+      if(!badge) return;
+      badge.classList.remove('loading', 'error');
+
+      if(state === 'loading') badge.classList.add('loading');
+      if(state === 'error') badge.classList.add('error');
+
+      const textEl = document.getElementById('refresh-status-text');
+      if(textEl) textEl.textContent = message || '';
+    }
+
+    function parseCSV(text){
+      const rows=[]; let cur="", row=[], inQ=false;
+      for (let i=0;i<text.length;i++){
+        const ch=text[i], nch=text[i+1];
+        if (inQ){
+          if (ch === '"' && nch === '"'){ cur += '"'; i++; }
+          else if (ch === '"'){ inQ = false; }
+          else { cur += ch; }
+        } else {
+          if (ch === '"'){ inQ = true; }
+          else if (ch === ','){ row.push(cur); cur = ""; }
+          else if (ch === '\n'){ row.push(cur); rows.push(row); row=[]; cur=""; }
+          else if (ch === '\r'){ /* ignore */ }
+          else { cur += ch; }
+        }
+      }
+      row.push(cur);
+      rows.push(row);
+      return rows;
+    }
+
+    async function refreshAllData(forceMessage = false){
+      if(isRefreshing) return;
+      isRefreshing = true;
+      setRefreshStatus('loading', 'Memuat data terbaru...');
+
+      try{
+        const jobs = [];
+
+        if (typeof fetchRekap === 'function') jobs.push(fetchRekap());
+        if (typeof fetchData === 'function') jobs.push(fetchData());
+        if (typeof loadTableData === 'function') jobs.push(loadTableData());
+
+        await Promise.allSettled(jobs);
+
+        lastRefreshAt = new Date();
+        setRefreshStatus('ok', `Data terakhir diperbarui: ${formatDateTimeID(lastRefreshAt)}`);
+      } catch (err){
+        console.error('Gagal refresh semua data:', err);
+        setRefreshStatus('error', `Gagal memperbarui data: ${err.message || err}`);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    function startAutoRefresh(){
+      stopAutoRefresh();
+      autoRefreshTimer = setInterval(() => {
+        refreshAllData();
+      }, AUTO_REFRESH_MS);
+    }
+
+    function stopAutoRefresh(){
+      if(autoRefreshTimer){
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+      }
+    }
   </script>
 </head>
 
@@ -87,7 +298,7 @@
       <div class="flex flex-col items-center lg:items-start animate__animated animate__fadeInLeft">
         <img src="assets/Bupati Bandung.png" alt="Kepala Dinas" class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full border-4 border-white shadow-xl object-contain bg-white"/>
         <p class="mt-3 text-lg md:text-2xl font-bold text-white drop-shadow-lg border-b-2 border-white pb-1">
-          Dr. H. M Dadang Supriatna, S. Ip., M. Si.
+          Dr. H. M Dadang Supriatna, S. Ip., M. Si.
         </p>
         <p class="text-sm md:text-lg text-white drop-shadow-lg mt-1">BUPATI BANDUNG</p>
       </div>
@@ -99,21 +310,21 @@
     <div class="wave"></div>
   </div>
 
-  <!-- ====== (BARU) RINGKASAN REKAP DINAS + CHART (gid=1853757195) ====== -->
+  <!-- RINGKASAN REKAP DINAS -->
   <div class="w-full max-w-7xl px-4 sm:px-6 -mt-10 mb-10">
     <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6">
       <h2 class="text-xl md:text-2xl font-bold text-teal-700 mb-6 text-center">📊 Rekap Pekerjaan Fisik, Non Fisik dan Belanja Umum DPUTR Kab.Bandung</h2>
 
-      <!-- Cards ringkasan -->
       <div id="rekap-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10"></div>
 
-      <!-- Line chart --
+      <!-- Kalau nanti ingin chart diaktifkan lagi, tinggal buka komentar ini
       <div class="bg-white/80 rounded-2xl shadow p-4">
         <h3 class="text-center text-teal-700 font-semibold mb-3">📈 Tren Prognosis</h3>
         <canvas id="prognosisChartTop"></canvas>
       </div>
+      -->
     </div>
-  </div> -->
+  </div>
 
   <!-- Dashboard Progress -->
   <div class="w-full max-w-[1500px] xl:max-w-[1600px] px-4 sm:px-6 mt-6 mb-6">
@@ -159,82 +370,61 @@
       <img src="https://img.icons8.com/color/80/money-bag.png" alt="Potensi Luar Sistem" class="card-img mb-2" />
       <span class="card-text">Informasi PBG</span>
     </a>
-     <a href="https://sites.google.com/view/informasi-persampahan" 
-   class="dashboard-card animate__animated animate__fadeInUp delay-7" 
-   aria-label="Informasi Persampahan">
-  <img src="https://img.icons8.com/color/80/trash.png" 
-       alt="Informasi Persampahan" 
-       class="card-img mb-2" />
-  <span class="card-text">Informasi Persampahan</span>
-</a>
-
-<a href="https://sites.google.com/view/informasi-banjir-dan-genangan/titik-banjir-dan-genangan"
-   class="dashboard-card animate__animated animate__fadeInUp delay-7"
-   aria-label="Informasi Banjir dan Genangan">
-  <img src="https://img.icons8.com/color/80/floods.png"
-       alt="Informasi Banjir dan Genangan"
-       class="card-img mb-2" />
-  <span class="card-text">Informasi Banjir dan Genangan</span>
-</a>
-    
-    <a href="https://sites.google.com/view/program-prioritas/lokasi-prioritas?authuser=0" 
-   class="dashboard-card animate__animated animate__fadeInUp delay-7" 
-   aria-label="Lokasi Prioritas Pembangunan">
-  <img src="https://img.icons8.com/color/80/marker.png" 
-       alt="Lokasi Prioritas Pembangunan" 
-       class="card-img mb-2" />
-  <span class="card-text">Lokasi Prioritas Pembangunan</span>
-</a>
-
-     <a href="https://pemberdayaan.go.id/pages/inpres" 
-   class="dashboard-card animate__animated animate__fadeInUp delay-7" 
-   aria-label="Dashboard Agregat Data Tunggal Sosial Ekonomi Nasional (DTSEN)">
-  <img src="https://img.icons8.com/color/80/combo-chart--v1.png" 
-       alt="Dashboard DTSEN" 
-       class="card-img mb-2" />
-  <span class="card-text">Dashboard Agregat Data Tunggal Sosial Ekonomi Nasional (DTSEN)</span>
-</a>
-
-
-    
+    <a href="https://sites.google.com/view/informasi-persampahan" class="dashboard-card animate__animated animate__fadeInUp delay-7" aria-label="Informasi Persampahan">
+      <img src="https://img.icons8.com/color/80/trash.png" alt="Informasi Persampahan" class="card-img mb-2" />
+      <span class="card-text">Informasi Persampahan</span>
+    </a>
+    <a href="https://sites.google.com/view/informasi-banjir-dan-genangan/titik-banjir-dan-genangan" class="dashboard-card animate__animated animate__fadeInUp delay-7" aria-label="Informasi Banjir dan Genangan">
+      <img src="https://img.icons8.com/color/80/floods.png" alt="Informasi Banjir dan Genangan" class="card-img mb-2" />
+      <span class="card-text">Informasi Banjir dan Genangan</span>
+    </a>
+    <a href="https://sites.google.com/view/program-prioritas/lokasi-prioritas?authuser=0" class="dashboard-card animate__animated animate__fadeInUp delay-7" aria-label="Lokasi Prioritas Pembangunan">
+      <img src="https://img.icons8.com/color/80/marker.png" alt="Lokasi Prioritas Pembangunan" class="card-img mb-2" />
+      <span class="card-text">Lokasi Prioritas Pembangunan</span>
+    </a>
+    <a href="https://pemberdayaan.go.id/pages/inpres" class="dashboard-card animate__animated animate__fadeInUp delay-7" aria-label="Dashboard Agregat Data Tunggal Sosial Ekonomi Nasional (DTSEN)">
+      <img src="https://img.icons8.com/color/80/combo-chart--v1.png" alt="Dashboard DTSEN" class="card-img mb-2" />
+      <span class="card-text">Dashboard Agregat Data Tunggal Sosial Ekonomi Nasional (DTSEN)</span>
+    </a>
     <a href="https://sites.google.com/view/tanya-saya/tanya-ai" class="dashboard-card animate__animated animate__fadeInUp delay-7" aria-label="Tanya AI">
       <img src="https://img.icons8.com/color/80/artificial-intelligence.png" alt="Tanya AI" class="card-img mb-2" />
       <span class="card-text">Tanya AI</span>
     </a>
   </div> 
 
-  <!-- Data tabel dari Sheet (opsional): aman karena textContent -->
+  <!-- Data tabel dari Sheet (opsional) -->
   <script>
     const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQfPFj1SxjErXTz4pwoIioVXnA90uqCEjPBDPhnNi6y9j5yPv59-LWTwNlCdg4mNtDgMkktWjt2mWM/pub?gid=0&single=true&output=csv";
-    function toNumber(val){ if (val==null) return NaN; const n=String(val).replace(/[^\d.-]/g,""); return n?Number(n):NaN; }
-    function formatRupiah(v){ const n=toNumber(v); if (isNaN(n)) return String(v??''); return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",minimumFractionDigits:0}).format(n); }
-    function formatPercent(v){ if (v==null) return "-"; const s=String(v).trim(); if (s.endsWith("%")) return sanitizeText(s); let n=toNumber(s); if (isNaN(n)) return sanitizeText(v); if (n<=1) n*=100; return n.toFixed(2)+"%"; }
 
-    // Parser CSV sederhana dengan dukungan kutip
-    function parseCSV(text){
-      const rows=[]; let cur="", row=[], inQ=false;
-      for (let i=0;i<text.length;i++){
-        const ch=text[i], nch=text[i+1];
-        if (inQ){
-          if (ch==='"' && nch==='"'){ cur+='"'; i++; }
-          else if (ch==='"'){ inQ=false; }
-          else { cur+=ch; }
-        } else {
-          if (ch==='"'){ inQ=true; }
-          else if (ch===','){ row.push(cur); cur=""; }
-          else if (ch==='\n'){ row.push(cur); rows.push(row); row=[]; cur=""; }
-          else if (ch==='\r'){ /* ignore */ }
-          else { cur+=ch; }
-        }
-      }
-      row.push(cur); rows.push(row);
-      return rows;
+    function toNumber(val){
+      if (val == null) return NaN;
+      const n = String(val).replace(/[^\d.-]/g,"");
+      return n ? Number(n) : NaN;
+    }
+
+    function formatRupiah(v){
+      const n = toNumber(v);
+      if (isNaN(n)) return String(v ?? '');
+      return new Intl.NumberFormat("id-ID", {
+        style:"currency",
+        currency:"IDR",
+        minimumFractionDigits:0
+      }).format(n);
+    }
+
+    function formatPercent(v){
+      if (v == null) return "-";
+      const s = String(v).trim();
+      if (s.endsWith("%")) return sanitizeText(s);
+      let n = toNumber(s);
+      if (isNaN(n)) return sanitizeText(v);
+      if (n <= 1) n *= 100;
+      return n.toFixed(2) + "%";
     }
 
     async function loadTableData(){
       try{
-        const res = await fetch(safeURL(sheetUrl));
-        const text = await res.text();
+        const text = await fetchTextNoCache(sheetUrl);
         const rows = parseCSV(text.trim());
         if (!rows || !rows.length) return;
 
@@ -243,21 +433,27 @@
 
         const headerRow = document.getElementById("table-header");
         const tbody     = document.getElementById("table-body");
-        if (!headerRow || !tbody) return; // jika memang tidak ada tabel di halaman ini
+        if (!headerRow || !tbody) return;
 
-        // indeks bantuan (opsional)
         const idxPagu = header.findIndex(h => h.toLowerCase().includes("pagu"));
-        const idxKontrakAll = header.map((h,i)=>({h,i})).filter(({h})=>h.toLowerCase().includes("nilai kontrak")).map(({i})=>i);
+        const idxKontrakAll = header
+          .map((h,i)=>({h,i}))
+          .filter(({h})=>h.toLowerCase().includes("nilai kontrak"))
+          .map(({i})=>i);
         const idxKontrak = idxKontrakAll.length ? idxKontrakAll[idxKontrakAll.length-1] : -1;
 
         let idxPersenPagu = header.findIndex(h => h.toLowerCase().includes("persentase") && h.toLowerCase().includes("pagu"));
         let addComputed = false;
-        if (idxPersenPagu === -1) { header.push("PERSENTASE TERHADAP PAGU"); idxPersenPagu = header.length-1; addComputed = true; }
+        if (idxPersenPagu === -1) {
+          header.push("PERSENTASE TERHADAP PAGU");
+          idxPersenPagu = header.length - 1;
+          addComputed = true;
+        }
 
         headerRow.innerHTML = "";
         header.forEach(h => {
-          const th=document.createElement("th");
-          th.className="px-3 py-2 border text-xs sm:text-sm md:text-base min-w-[140px] md:min-w-[180px]";
+          const th = document.createElement("th");
+          th.className = "px-3 py-2 border text-xs sm:text-sm md:text-base min-w-[140px] md:min-w-[180px]";
           setText(th, h);
           headerRow.appendChild(th);
         });
@@ -270,84 +466,92 @@
           if (idxPagu !== -1 && idxKontrak !== -1){
             const paguVal = toNumber(cells[idxPagu]);
             const kontrakVal = toNumber(cells[idxKontrak]);
-            const percent = (isFinite(paguVal) && paguVal>0 && isFinite(kontrakVal)) ? (kontrakVal/paguVal)*100 : NaN;
+            const percent = (isFinite(paguVal) && paguVal > 0 && isFinite(kontrakVal))
+              ? (kontrakVal / paguVal) * 100
+              : NaN;
             cells[idxPersenPagu] = isFinite(percent) ? percent.toFixed(2) + "%" : "-";
           }
 
-          const tr=document.createElement("tr");
+          const tr = document.createElement("tr");
           cells.forEach((cell, idx) => {
             const hLower = (header[idx] || "").toLowerCase();
-            const td=document.createElement("td");
-            td.className="px-3 py-2 border text-gray-700 align-middle";
+            const td = document.createElement("td");
+            td.className = "px-3 py-2 border text-gray-700 align-middle";
+
             if (hLower.includes("persentase")) {
-              setText(td, formatPercent(cell)); td.classList.add("text-right");
+              setText(td, formatPercent(cell));
+              td.classList.add("text-right");
             } else if (hLower.includes("pagu") || hLower.includes("nilai kontrak") || hLower.includes("anggaran")) {
-              setText(td, formatRupiah(cell)); td.classList.add("text-right");
-            } else if (!isNaN(toNumber(cell)) && String(cell).trim()!=="") {
-              setText(td, cell); td.classList.add("text-right");
-            } else { setText(td, cell); }
+              setText(td, formatRupiah(cell));
+              td.classList.add("text-right");
+            } else if (!isNaN(toNumber(cell)) && String(cell).trim() !== "") {
+              setText(td, cell);
+              td.classList.add("text-right");
+            } else {
+              setText(td, cell);
+            }
             tr.appendChild(td);
           });
+
           tbody.appendChild(tr);
         });
 
-      } catch(e){ console.error("Gagal memuat data:", e); }
+      } catch(e){
+        console.error("Gagal memuat data tabel:", e);
+      }
     }
   </script>
 
-  <!-- ====== (BARU) SCRIPT REKAP DINAS TOP (gid=1853757195) ====== -->
-<script>
-  (function(){
+  <!-- SCRIPT REKAP DINAS TOP -->
+  <script>
     const CSV_REKAP_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1853757195&single=true&output=csv";
 
-    // Formatter
     const fIDR = n => isNaN(n) ? '-' :
-      new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
+      new Intl.NumberFormat('id-ID',{
+        style:'currency',
+        currency:'IDR',
+        maximumFractionDigits:0
+      }).format(n);
+
     const fInt = n => isNaN(n) ? '-' : new Intl.NumberFormat('id-ID').format(n);
     const fPct = n => isNaN(n) ? '-' : `${(+n).toFixed(2)}%`;
-    const toNum = s => parseFloat(String(s||'').replace(/\./g,'').replace(/,/g,'.')) || 0;
 
-    // Card
+    function toNumRekap(s){
+      if (s == null) return 0;
+      let raw = String(s).trim();
+      if (!raw) return 0;
+
+      // Tangani persen & angka Indonesia
+      raw = raw.replace(/[^\d,.-]/g,'');
+      raw = raw.replace(/\.(?=\d{3}(\D|$))/g,'');
+      raw = raw.replace(',', '.');
+
+      const n = parseFloat(raw);
+      return isNaN(n) ? 0 : n;
+    }
+
     function card(title, main, sub, prog, color="teal"){
       const bar =
-        color==="green" ? "bg-green-500" :
-        color==="cyan"  ? "bg-cyan-500"  :
-        color==="lime"  ? "bg-lime-500"  : "bg-teal-500";
+        color === "green" ? "bg-green-500" :
+        color === "cyan"  ? "bg-cyan-500"  :
+        color === "lime"  ? "bg-lime-500"  : "bg-teal-500";
+
       const hasProg = prog !== undefined && !isNaN(prog);
+
       return `
         <div class="bg-white/90 border border-teal-100 p-4 rounded-2xl shadow hover:shadow-lg transition text-center">
-          <h2 class="text-sm font-semibold mb-2 text-gray-600">${title}</h2>
-          <p class="text-xl font-bold text-teal-700">${main}</p>
-          ${sub ? `<p class="mt-1 text-sm text-gray-500">${sub}</p>` : ``}
+          <h2 class="text-sm font-semibold mb-2 text-gray-600">${escapeHTML(title)}</h2>
+          <p class="text-xl font-bold text-teal-700">${escapeHTML(main)}</p>
+          ${sub ? `<p class="mt-1 text-sm text-gray-500">${escapeHTML(sub)}</p>` : ``}
           ${hasProg ? `
             <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-              <div class="${bar} h-2 rounded-full" style="width:${prog}%;"></div>
+              <div class="${bar} h-2 rounded-full" style="width:${Math.max(0, Math.min(100, prog))}%;"></div>
             </div>` : ``}
         </div>
       `;
     }
 
-    // Parser CSV lokal
-    function parseCSV(text){
-      const rows=[]; let cur="", row=[], inQ=false;
-      for (let i=0;i<text.length;i++){
-        const ch=text[i],n=text[i+1];
-        if(inQ){
-          if(ch==='"' && n==='"'){cur+='"';i++}
-          else if(ch==='"'){inQ=false}
-          else cur+=ch;
-        }else{
-          if(ch==='"'){inQ=true}
-          else if(ch===','){row.push(cur);cur=""}
-          else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur=""}
-          else if(ch!=='\r'){cur+=ch}
-        }
-      }
-      row.push(cur); rows.push(row);
-      return rows;
-    }
-
-    function render(d){
+    function renderRekap(d){
       const wrap = document.getElementById('rekap-cards');
       if(!wrap) return;
 
@@ -372,7 +576,12 @@
 
       const ctx = document.getElementById('prognosisChartTop')?.getContext('2d');
       if(!ctx) return;
-      new Chart(ctx,{
+
+      if (prognosisChartInstance) {
+        prognosisChartInstance.destroy();
+      }
+
+      prognosisChartInstance = new Chart(ctx,{
         type:'line',
         data:{
           labels:["30 Sept 2025","31 Okt 2025","30 Nov 2025"],
@@ -400,193 +609,164 @@
 
     async function fetchRekap(){
       try{
-        const res = await fetch(CSV_REKAP_URL);
-        const text = await res.text();
+        const text = await fetchTextNoCache(CSV_REKAP_URL);
         const rows = parseCSV(text.trim());
 
-        // Ambil baris data pertama setelah header yang tidak kosong
-        const dataRow = (rows.slice(1).find(r => r.some(c => String(c).trim() !== "")) ) || rows[1] || [];
+        const dataRow = (rows.slice(1).find(r => r.some(c => String(c).trim() !== ""))) || rows[1] || [];
 
-        // Kolom A–P
-        const totalPaket             = toNum(dataRow[0]);
-        const totalAnggaran          = toNum(dataRow[1]);
-        const pekerjaanFisik         = toNum(dataRow[2]);
-        const paguFisik              = toNum(dataRow[3]);
-        const nonFisik               = toNum(dataRow[4]);
-        const paguNonFisik           = toNum(dataRow[5]);
-        const belanjaUmum            = toNum(dataRow[6]);
-        const persiapanPengadaan     = toNum(dataRow[7]);
-        const paguPengadaan          = toNum(dataRow[8]);
-        const berkontrak             = toNum(dataRow[9]);
-        const nilaiKontrakBerkontrak = toNum(dataRow[10]);
-        const selesai                = toNum(dataRow[11]);
-        const nilaiKontrakSelesai    = toNum(dataRow[12]);
-        const prognosisSept          = toNum(dataRow[13]);
-        const prognosisOkt           = toNum(dataRow[14]);
-        const prognosisNov           = toNum(dataRow[15]);
+        const totalPaket             = toNumRekap(dataRow[0]);
+        const totalAnggaran          = toNumRekap(dataRow[1]);
+        const pekerjaanFisik         = toNumRekap(dataRow[2]);
+        const paguFisik              = toNumRekap(dataRow[3]);
+        const nonFisik               = toNumRekap(dataRow[4]);
+        const paguNonFisik           = toNumRekap(dataRow[5]);
+        const belanjaUmum            = toNumRekap(dataRow[6]);
+        const persiapanPengadaan     = toNumRekap(dataRow[7]);
+        const paguPengadaan          = toNumRekap(dataRow[8]);
+        const berkontrak             = toNumRekap(dataRow[9]);
+        const nilaiKontrakBerkontrak = toNumRekap(dataRow[10]);
+        const selesai                = toNumRekap(dataRow[11]);
+        const nilaiKontrakSelesai    = toNumRekap(dataRow[12]);
+        const prognosisSept          = toNumRekap(dataRow[13]);
+        const prognosisOkt           = toNumRekap(dataRow[14]);
+        const prognosisNov           = toNumRekap(dataRow[15]);
 
-        render({
+        renderRekap({
           totalPaket, totalAnggaran, pekerjaanFisik, paguFisik,
           nonFisik, paguNonFisik, belanjaUmum, persiapanPengadaan,
           paguPengadaan, berkontrak, nilaiKontrakBerkontrak,
           selesai, nilaiKontrakSelesai, prognosisSept, prognosisOkt, prognosisNov,
-          pctPaketSelesai: totalPaket>0 ? (selesai/totalPaket*100) : 0,
-          pctNilaiKontrakSelesai: totalAnggaran>0 ? (nilaiKontrakSelesai/totalAnggaran*100) : 0,
-          pctPrognosisSept: totalAnggaran>0 ? (prognosisSept/totalAnggaran*100) : 0,
-          pctPrognosisOkt: totalAnggaran>0 ? (prognosisOkt/totalAnggaran*100) : 0,
-          pctPrognosisNov: totalAnggaran>0 ? (prognosisNov/totalAnggaran*100) : 0
+          pctPaketSelesai: totalPaket > 0 ? (selesai / totalPaket * 100) : 0,
+          pctNilaiKontrakSelesai: totalAnggaran > 0 ? (nilaiKontrakSelesai / totalAnggaran * 100) : 0,
+          pctPrognosisSept: totalAnggaran > 0 ? (prognosisSept / totalAnggaran * 100) : 0,
+          pctPrognosisOkt: totalAnggaran > 0 ? (prognosisOkt / totalAnggaran * 100) : 0,
+          pctPrognosisNov: totalAnggaran > 0 ? (prognosisNov / totalAnggaran * 100) : 0
         });
-      }catch(e){
+      } catch(e){
         console.error("Gagal memuat rekap dinas:", e);
+        throw e;
       }
     }
-
-    document.addEventListener('DOMContentLoaded', fetchRekap);
-  })();
-</script>
+  </script>
 
   <!-- Dashboard Progress -->
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvrgVrpTFMrG-NDpW9HUzpmSvFVOFH-k2o4C9cOp3XwC-EtJaiCL1T5Y4nBgLeaDw-gTJS8O3q1EHd/pub?gid=1875135079&single=true&output=csv";
 
-    // ✅ Parser CSV (pakai versi paling stabil)
-    function parseCSV(text){
-      const rows=[]; let cur="", row=[], inQ=false;
-      for(let i=0;i<text.length;i++){
-        const ch=text[i],n=text[i+1];
-        if(inQ){
-          if(ch==='"'&&n==='"'){cur+='"';i++;}
-          else if(ch==='"'){inQ=false;}
-          else cur+=ch;
-        }else{
-          if(ch==='"'){inQ=true;}
-          else if(ch===','){row.push(cur);cur="";}
-          else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur="";}
-          else if(ch!=='\r'){cur+=ch;}
-        }
-      }
-      row.push(cur);rows.push(row);
-      return rows;
+    function toNum(v){
+      if(v == null) return 0;
+      let s = String(v).trim();
+      if(!s) return 0;
+      s = s.replace(/[^\d,.-]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',', '.');
+      const n = parseFloat(s);
+      return isNaN(n) ? 0 : n;
     }
 
-    // ✅ Formatter & kalkulator aman
-    function toNum(v){
-      if(v==null) return 0;
-      let s=String(v).trim();
-      if(!s) return 0;
-      s=s.replace(/[^\d,.-]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',', '.');
-      const n=parseFloat(s);
-      return isNaN(n)?0:n;
-    }
-    const persen = (a,b) => b>0 ? Math.round((a/b)*1000)/10 : 0;
+    const persen = (a,b) => b > 0 ? Math.round((a / b) * 1000) / 10 : 0;
     const rupiah = v => "Rp " + toNum(v).toLocaleString('id-ID');
 
-    // ✅ Fungsi utama untuk render dashboard
     function renderDashboard(data){
-      const container=document.getElementById("dashboard");
-      container.innerHTML="";
-      data.forEach(row=>{
-        const unit=sanitizeText(row[0]);
+      const container = document.getElementById("dashboard");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      data.forEach(row => {
+        const unit = sanitizeText(row[0]);
         if(!unit) return;
 
-        const jumlah=toNum(row[1]),
-              pagu=toNum(row[2]),
-              persiapan=toNum(row[3]),
-              nilaiPersiapan=toNum(row[4]),
-              berkontrak=toNum(row[5]),
-              nilaiBerkontrak=toNum(row[6]),
-              selesai=toNum(row[7]),
-              nilaiSelesai=toNum(row[8]);
+        const jumlah         = toNum(row[1]);
+        const pagu           = toNum(row[2]);
+        const persiapan      = toNum(row[3]);
+        const nilaiPersiapan = toNum(row[4]);
+        const berkontrak     = toNum(row[5]);
+        const nilaiBerkontrak= toNum(row[6]);
+        const selesai        = toNum(row[7]);
+        const nilaiSelesai   = toNum(row[8]);
 
-        // Buat elemen kartu
-        const card=document.createElement("div");
-        card.className="bg-white shadow-lg rounded-xl p-6 w-full";
-        card.innerHTML=`
-          <h2 class="text-2xl font-bold text-indigo-600 mb-2">${unit}</h2>
-          <p class="text-sm text-gray-600">Jumlah Total Paket: <span class="font-semibold">${jumlah}</span></p>
-          <p class="text-sm text-gray-600 mb-4">Total Pagu Anggaran: <span class="font-semibold">${rupiah(pagu)}</span></p>
+        const card = document.createElement("div");
+        card.className = "bg-white shadow-lg rounded-xl p-6 w-full";
+        card.innerHTML = `
+          <h2 class="text-2xl font-bold text-indigo-600 mb-2">${escapeHTML(unit)}</h2>
+          <p class="text-sm text-gray-600">Jumlah Total Paket: <span class="font-semibold">${escapeHTML(String(jumlah))}</span></p>
+          <p class="text-sm text-gray-600 mb-4">Total Pagu Anggaran: <span class="font-semibold">${escapeHTML(rupiah(pagu))}</span></p>
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
             <div class="p-4 rounded-lg border bg-indigo-50">
               <h3 class="font-semibold text-lg mb-2">Persiapan</h3>
-              <p class="text-2xl font-bold text-indigo-700">${persiapan}</p>
-              <p class="text-gray-600">(${persen(persiapan,jumlah)}% paket)</p>
-              <p class="text-sm text-gray-500">${rupiah(nilaiPersiapan)} (${persen(nilaiPersiapan,pagu)}% pagu)</p>
+              <p class="text-2xl font-bold text-indigo-700">${escapeHTML(String(persiapan))}</p>
+              <p class="text-gray-600">(${escapeHTML(String(persen(persiapan,jumlah)))}% paket)</p>
+              <p class="text-sm text-gray-500">${escapeHTML(rupiah(nilaiPersiapan))} (${escapeHTML(String(persen(nilaiPersiapan,pagu)))}% pagu)</p>
             </div>
 
             <div class="p-4 rounded-lg border bg-green-50">
               <h3 class="font-semibold text-lg mb-2">Berkontrak</h3>
-              <p class="text-2xl font-bold text-green-700">${berkontrak}</p>
-              <p class="text-gray-600">(${persen(berkontrak,jumlah)}% paket)</p>
-              <p class="text-sm text-gray-500">${rupiah(nilaiBerkontrak)} (${persen(nilaiBerkontrak,pagu)}% pagu)</p>
+              <p class="text-2xl font-bold text-green-700">${escapeHTML(String(berkontrak))}</p>
+              <p class="text-gray-600">(${escapeHTML(String(persen(berkontrak,jumlah)))}% paket)</p>
+              <p class="text-sm text-gray-500">${escapeHTML(rupiah(nilaiBerkontrak))} (${escapeHTML(String(persen(nilaiBerkontrak,pagu)))}% pagu)</p>
             </div>
 
             <div class="p-4 rounded-lg border bg-blue-50">
               <h3 class="font-semibold text-lg mb-2">Selesai</h3>
-              <p class="text-2xl font-bold text-blue-700">${selesai}</p>
-              <p class="text-gray-600">(${persen(selesai,jumlah)}% paket)</p>
-              <p class="text-sm text-gray-500">${rupiah(nilaiSelesai)} (${persen(nilaiSelesai,pagu)}% pagu)</p>
+              <p class="text-2xl font-bold text-blue-700">${escapeHTML(String(selesai))}</p>
+              <p class="text-gray-600">(${escapeHTML(String(persen(selesai,jumlah)))}% paket)</p>
+              <p class="text-sm text-gray-500">${escapeHTML(rupiah(nilaiSelesai))} (${escapeHTML(String(persen(nilaiSelesai,pagu)))}% pagu)</p>
             </div>
+          </div>
+        `;
 
-          </div>`;
         container.appendChild(card);
       });
     }
 
-    // ✅ Loader utama
     async function fetchData(){
-      const res=await fetch(safeURL(csvUrl));
-      const text=await res.text();
-      const rows=parseCSV(text.trim());
-      renderDashboard(rows.slice(1));
+      try{
+        const text = await fetchTextNoCache(csvUrl);
+        const rows = parseCSV(text.trim());
+        renderDashboard(rows.slice(1));
+      } catch(err){
+        console.error("Gagal memuat dashboard progres:", err);
+        throw err;
+      }
     }
-
-    document.addEventListener('DOMContentLoaded',fetchData);
   </script>
 
+  <!-- Footer -->
+  <footer class="mt-12 w-full bg-black/40 backdrop-blur-sm py-4 shadow-inner animate__animated animate__fadeInUp">
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 text-white">
+      <img src="assets/DPUTR HIJAU.png" class="h-10 w-10 object-contain" alt="DPUTR"/>
+      <p class="text-sm font-medium text-center">
+        © <span id="year"></span> Dinas Pekerjaan Umum dan Tata Ruang – Kabupaten Bandung
+      </p>
+    </div>
+  </footer>
 
-  <!-- Footer Dark -->
-<footer class="mt-12 w-full bg-black/40 backdrop-blur-sm py-4 shadow-inner animate__animated animate__fadeInUp">
-  <div class="flex flex-col sm:flex-row items-center justify-center gap-3 text-white">
-    <!-- Logo instansi (bisa diganti sesuai kebutuhan) -->
-    <img src="assets/DPUTR HIJAU.png" class="h-10 w-10 object-contain"/>
-    <p class="text-sm font-medium text-center">
-      © <span id="year"></span> Dinas Pekerjaan Umum dan Tata Ruang – Kabupaten Bandung
-    </p>
+  <!-- Badge status refresh -->
+  <div id="refresh-status" class="refresh-badge">
+    <span class="dot"></span>
+    <span id="refresh-status-text">Menunggu pemuatan data...</span>
   </div>
-</footer>
 
-<script>
-  // Update tahun otomatis
-  document.getElementById("year").textContent = new Date().getFullYear();
-</script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
 
+    document.addEventListener('DOMContentLoaded', async () => {
+      await refreshAllData(true);
+      startAutoRefresh();
+    });
 
+    window.addEventListener('focus', () => {
+      refreshAllData();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        refreshAllData();
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+      }
+    });
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
